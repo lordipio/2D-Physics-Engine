@@ -43,3 +43,16 @@ Vec2 Force::GenerateGravitationalForce(const Particle* ParticleA, const Particle
 	return (normalizedDistance * (G * ParticleA->Mass * ParticleB->Mass)) / distanceSquaredMagnitude;
 }
 
+Vec2 Force::GenerateSpringForce(const Particle* particle, const Vec2& anchor, const float& rest, const float& K)
+{
+	Vec2 distance = particle->Position - anchor;
+
+	float displacement = distance.Magnitude() - rest;
+
+	Vec2 springForceDirection = distance.UnitVector();
+
+	Vec2 springForce = springForceDirection * (displacement * K);
+
+	return springForce;
+}
+
