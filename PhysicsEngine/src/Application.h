@@ -18,6 +18,8 @@ private:
 
 	SDL_Rect FluidRect;
 
+	Vec2 mouseCursor = Vec2(0, 0);
+	bool rightMouseButtonDown = false;
 public:
 	Application() = default;
 	~Application() = default;
