@@ -51,7 +51,7 @@ Vec2 Force::GenerateSpringForce(const Particle* particle, const Vec2& anchor, co
 
 	Vec2 springForceDirection = distance.UnitVector();
 
-	Vec2 springForce = springForceDirection * (displacement * K);
+	Vec2 springForce = springForceDirection * (displacement * -K);
 
 	return springForce;
 }
