@@ -175,7 +175,7 @@ void Application::Update()
 
 void Application::Render()
 {
-	Graphics::ClearScreen(0xFF056263);
+	Graphics::ClearScreen(0xFF333333);
 
 
 
