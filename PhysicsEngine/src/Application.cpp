@@ -10,7 +10,7 @@ void Application::Setup()
 	isRunning = Graphics::OpenWindow();
 
 	particles.push_back(new Particle(Vec2(100, 100), 1, 10.f));
-	//particles.push_back(new Particle(Vec2(200, 200), 2, 20.f));
+	particles.push_back(new Particle(Vec2(200, 200), 2, 20.f));
 
 	FluidRect.x = 0;
 	FluidRect.y = Graphics::Height() / 2.f;
@@ -116,12 +116,16 @@ void Application::Update()
 
 	Vec2 wind = Vec2(0.4f * PIXEL_PER_METER, 0);
 	
+	Vec2 gravitationalForce = Force::GenerateGravitationalForce(particles[0], particles[1], 1000.f, 10, 50);
+	particles[0]->AddForce(gravitationalForce);
+	particles[1]->AddForce(-gravitationalForce);
+
 
 	for (Particle* particle : particles)
 	{
 		particle->AddForce(PushForce);
-		Vec2 friction = Force::GenerateFrictionForce(particle->Velocity, 0.002f);
-		particle->AddForce(friction);
+		//Vec2 friction = Force::GenerateFrictionForce(particle->Velocity, 0.002f);
+		//particle->AddForce(friction);
 		//particle->AddForce(Vec2(0.f, particle->Mass * 9.8 * PIXEL_PER_METER));
 
 		//if (particle->Position.y > Graphics::Height() - FluidRect.h)
@@ -177,8 +181,9 @@ void Application::Render()
 
 	// Graphics::DrawFillRect(FluidRect.x + FluidRect.w / 2, FluidRect.y + FluidRect.h / 2, FluidRect.w, FluidRect.h, 0xFFFF0000);
 
-	for (Particle* particle : particles)
-		Graphics::DrawFillCircle(particle->Position.x, particle->Position.y, particle->Radius, 0xFFFFFFFF);
+	//for (Particle* particle : particles)
+		Graphics::DrawFillCircle(particles[0]->Position.x, particles[0]->Position.y, particles[0]->Radius, 0xFFFF3333);
+		Graphics::DrawFillCircle(particles[1]->Position.x, particles[1]->Position.y, particles[1]->Radius, 0xFF00FF33);
 
 	if (rightMouseButtonDown) {
 		Graphics::DrawLine(particles[0]->Position.x, particles[0]->Position.y, mouseCursor.x, mouseCursor.y, 0xFFFF00FF);
