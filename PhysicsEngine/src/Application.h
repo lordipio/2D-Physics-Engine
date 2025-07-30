@@ -23,8 +23,10 @@ private:
 
 	Vec2 anchor;
 	const float K = 300.f;
-	const float restLength = 15.f;
-	const int numberOfParticles = 1;
+	const float g = 9.8f;
+	const float restLength = 10.f;
+	const int numberOfParticles = 15;
+	const float mass = 2;
 
 public:
 	Application() = default;

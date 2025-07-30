@@ -11,8 +11,21 @@ void Application::Setup()
 
 	anchor = Vec2(Graphics::Width() / 2, 10.f);
 
+	float accumulativeWeight = 0;
+
 	for (int i = 1; i <= numberOfParticles; i++)
-		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + i * restLength), 2, 6.f));
+	{
+		accumulativeWeight += numberOfParticles - i + 1;
+		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * mass * (accumulativeWeight)) + i * restLength), 2, 6.f));
+
+	}
+
+		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (3)) + 1 * restLength), 2, 6.f));
+		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (5)) + 2 * restLength), 2, 6.f));
+		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (6)) + 3 * restLength), 2, 6.f));
+//		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (numberOfParticles - 1 + 2)) + 3 * restLength), 2, 6.f));
+		//particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (numberOfParticles - 1 + 2)) + 2 * restLength), 2, 6.f));
+	//	particles.push_back(new Particle(Vec2(anchor.x, 9.8 + 15 + 10), 2, 6.f));
 
 	FluidRect.x = 0;
 	FluidRect.y = Graphics::Height() / 2.f;
@@ -182,37 +195,36 @@ void Application::Update()
 	for (Particle* particle : particles)
 	{
 		particle->AddForce(PushForce);
-		//particle->AddForce(Vec2(0.f, 9.8f) * particle->Mass * PIXEL_PER_METER);
-		Vec2 drag = Force::GenerateDragForce(particle->Velocity, 0.002);
-		//Vec2 friction = Force::GenerateFrictionForce(particle->Velocity, 0.002f);
-		//particle->AddForce(drag);
+		particle->AddForce(Vec2(0.f, g) * particle->Mass * PIXEL_PER_METER);
+		Vec2 friction = Force::GenerateFrictionForce(particle->Velocity, 0.005f);
+		particle->AddForce(friction);
 
 		particle->Integrate(deltaTime);
 
 
-		//if (particle->Position.x + particle->Radius <= 0)
-		//{
-		//	particle->Position.x = particle->Radius;
-		//	particle->Velocity.x *= -1.f;
-		//}
+		if (particle->Position.x + particle->Radius <= 0)
+		{
+			particle->Position.x = particle->Radius;
+			particle->Velocity.x *= -1.f;
+		}
 
-		//else if (particle->Position.x + particle->Radius >= Graphics::Width())
-		//{
-		//	particle->Position.x = Graphics::Width() - particle->Radius;
-		//	particle->Velocity.x *= -1.f;
-		//}
+		else if (particle->Position.x + particle->Radius >= Graphics::Width())
+		{
+			particle->Position.x = Graphics::Width() - particle->Radius;
+			particle->Velocity.x *= -1.f;
+		}
 
-		//if (particle->Position.y + particle->Radius <= 0)
-		//{
-		//	particle->Position.y = particle->Radius;
-		//	particle->Velocity.y *= -1.f;
-		//}
+		if (particle->Position.y + particle->Radius <= 0)
+		{
+			particle->Position.y = particle->Radius;
+			particle->Velocity.y *= -1.f;
+		}
 
-		//else if (particle->Position.y + particle->Radius >= Graphics::Height())
-		//{
-		//	particle->Position.y = Graphics::Height() - particle->Radius;
-		//	particle->Velocity.y *= -1.f;
-		//}
+		else if (particle->Position.y + particle->Radius >= Graphics::Height())
+		{
+			particle->Position.y = Graphics::Height() - particle->Radius;
+			particle->Velocity.y *= -1.f;
+		}
 	}
 
 
