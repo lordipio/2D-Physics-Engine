@@ -208,23 +208,23 @@ void Application::Update()
 			particle->Velocity.x *= -1.f;
 		}
 
-		//else if (particle->Position.x + particle->Radius >= Graphics::Width())
-		//{
-		//	particle->Position.x = Graphics::Width() - particle->Radius;
-		//	particle->Velocity.x *= -1.f;
-		//}
+		else if (particle->Position.x + particle->Radius >= Graphics::Width())
+		{
+			particle->Position.x = Graphics::Width() - particle->Radius;
+			particle->Velocity.x *= -1.f;
+		}
 
-		//if (particle->Position.y + particle->Radius <= 0)
-		//{
-		//	particle->Position.y = particle->Radius;
-		//	particle->Velocity.y *= -1.f;
-		//}
+		if (particle->Position.y + particle->Radius <= 0)
+		{
+			particle->Position.y = particle->Radius;
+			particle->Velocity.y *= -1.f;
+		}
 
-		//else if (particle->Position.y + particle->Radius >= Graphics::Height())
-		//{
-		//	particle->Position.y = Graphics::Height() - particle->Radius;
-		//	particle->Velocity.y *= -1.f;
-		//}
+		else if (particle->Position.y + particle->Radius >= Graphics::Height())
+		{
+			particle->Position.y = Graphics::Height() - particle->Radius;
+			particle->Velocity.y *= -1.f;
+		}
 	}
 
 
