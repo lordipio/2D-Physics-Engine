@@ -9,7 +9,8 @@ void Application::Setup()
 {
 	isRunning = Graphics::OpenWindow();
 
-	particles.push_back(new Particle(Vec2(Graphics::Width()/2, 400), 2, 20.f));
+	//particles.push_back(new Particle(Vec2(Graphics::Width()/2, 119.8), 2, 20.f));
+	particles.push_back(new Particle(Vec2(Graphics::Width()/2, 229.6), 2, 20.f));
 
 	FluidRect.x = 0;
 	FluidRect.y = Graphics::Height() / 2.f;
@@ -123,13 +124,14 @@ void Application::Update()
 	for (Particle* particle : particles)
 	{
 		particle->AddForce(PushForce);
-		Vec2 sptringForce = Force::GenerateSpringForce(particle, Vec2(Graphics::Width() / 2, 10), 10, 10);
+		Vec2 sptringForce = Force::GenerateSpringForce(particle, Vec2(Graphics::Width() / 2, 10), 200, 50);
+		Vec2 dragForce = Force::GenerateDragForce(particle->Velocity, 0.005);
+		particle->AddForce(dragForce);
 		particle->AddForce(sptringForce);
 		particle->AddForce(Vec2(0.f, 9.8f) * particle->Mass * PIXEL_PER_METER);
+
 		particle->Integrate(deltaTime);
 
-		Vec2 friction = Force::GenerateFrictionForce(particle->Velocity, 0.002f);
-		particle->AddForce(friction);
 		//particle->AddForce(Vec2(0.f, particle->Mass * 9.8 * PIXEL_PER_METER));
 
 		//if (particle->Position.y > Graphics::Height() - FluidRect.h)
@@ -143,29 +145,29 @@ void Application::Update()
 
 
 
-		if (particle->Position.x + particle->Radius <= 0)
-		{
-			particle->Position.x = particle->Radius;
-			particle->Velocity.x *= -1.f;
-		}
+		//if (particle->Position.x + particle->Radius <= 0)
+		//{
+		//	particle->Position.x = particle->Radius;
+		//	particle->Velocity.x *= -1.f;
+		//}
 
-		else if (particle->Position.x + particle->Radius >= Graphics::Width())
-		{
-			particle->Position.x = Graphics::Width() - particle->Radius;
-			particle->Velocity.x *= -1.f;
-		}
+		//else if (particle->Position.x + particle->Radius >= Graphics::Width())
+		//{
+		//	particle->Position.x = Graphics::Width() - particle->Radius;
+		//	particle->Velocity.x *= -1.f;
+		//}
 
-		if (particle->Position.y + particle->Radius <= 0)
-		{
-			particle->Position.y = particle->Radius;
-			particle->Velocity.y *= -1.f;
-		}
+		//if (particle->Position.y + particle->Radius <= 0)
+		//{
+		//	particle->Position.y = particle->Radius;
+		//	particle->Velocity.y *= -1.f;
+		//}
 
-		else if (particle->Position.y + particle->Radius >= Graphics::Height())
-		{
-			particle->Position.y = Graphics::Height() - particle->Radius;
-			particle->Velocity.y *= -1.f;
-		}
+		//else if (particle->Position.y + particle->Radius >= Graphics::Height())
+		//{
+		//	particle->Position.y = Graphics::Height() - particle->Radius;
+		//	particle->Velocity.y *= -1.f;
+		//}
 	}
 
 
