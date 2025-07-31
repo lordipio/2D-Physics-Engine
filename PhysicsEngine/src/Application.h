@@ -21,12 +21,10 @@ private:
 	Vec2 mouseCursor = Vec2(0, 0);
 	bool rightMouseButtonDown = false;
 
-	Vec2 anchor;
-	const float K = 300.f;
+	const float K = 500.f;
 	const float g = 9.8f;
-	const float restLength = 10.f;
-	const int numberOfParticles = 15;
-	const float mass = 2;
+	const float restLength = 200.f;
+	const float diagonalRestLength = 282.84;
 
 public:
 	Application() = default;
