@@ -27,7 +27,7 @@
     <ClCompile Include="src\Graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\Particle.cpp">
+    <ClCompile Include="src\physics\Body.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="lib\SDL2_gfx\SDL2_gfxPrimitives.c">
@@ -45,6 +45,9 @@
     <ClCompile Include="src\physics\Force.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\physics\Shape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\physics\Vec2.h">
@@ -56,7 +59,7 @@
     <ClInclude Include="src\Graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\physics\Particle.h">
+    <ClInclude Include="src\physics\Body.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="lib\SDL2_gfx\SDL2_gfxPrimitives.h">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\physics\Force.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\Shape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

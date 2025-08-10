@@ -13,25 +13,21 @@ void Application::Setup()
 
 	float accumulativeWeight = 0;
 
-	for (int i = 1; i <= numberOfParticles; i++)
+	for (int i = 1; i <= numberOfBodys; i++)
 	{
-		accumulativeWeight += numberOfParticles - i + 1;
-		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * mass * (accumulativeWeight)) + i * restLength), 2, 6.f));
+		accumulativeWeight += numberOfBodys - i + 1;
+		bodys.push_back(new Body(CircleShape(60), Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * mass * (accumulativeWeight)) + i * restLength), 2, 6.f));
 
 	}
 
-		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (3)) + 1 * restLength), 2, 6.f));
-		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (5)) + 2 * restLength), 2, 6.f));
-		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (6)) + 3 * restLength), 2, 6.f));
-//		particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (numberOfParticles - 1 + 2)) + 3 * restLength), 2, 6.f));
-		//particles.push_back(new Particle(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (numberOfParticles - 1 + 2)) + 2 * restLength), 2, 6.f));
-	//	particles.push_back(new Particle(Vec2(anchor.x, 9.8 + 15 + 10), 2, 6.f));
+//		bodys.push_back(new Body(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (numberOfBodys - 1 + 2)) + 3 * restLength), 2, 6.f));
+		//bodys.push_back(new Body(Vec2(anchor.x, anchor.y + ((g * PIXEL_PER_METER/K) * 2 * (numberOfBodys - 1 + 2)) + 2 * restLength), 2, 6.f));
+	//	bodys.push_back(new Body(Vec2(anchor.x, 9.8 + 15 + 10), 2, 6.f));
 
 	FluidRect.x = 0;
 	FluidRect.y = Graphics::Height() / 2.f;
 	FluidRect.w = Graphics::Width();
 	FluidRect.h = Graphics::Height() / 2.f;
-
 }
 
 void Application::Input()
@@ -84,7 +80,7 @@ void Application::Input()
 			{
 				int x, y;
 				SDL_GetMouseState(&x, &y);
-				particles.push_back(new Particle(Vec2(x, y), 1.f, 10));
+				bodys.push_back(new Body(CircleShape(50), Vec2(x, y), 1.f, 10));
 			}
 
 			if (!rightMouseButtonDown && event.button.button == SDL_BUTTON_RIGHT) {
@@ -104,9 +100,9 @@ void Application::Input()
 		case SDL_MOUSEBUTTONUP:
 			if (rightMouseButtonDown && event.button.button == SDL_BUTTON_RIGHT) {
 				rightMouseButtonDown = false;
-				Vec2 impulseDirection = (particles[numberOfParticles - 1]->Position - mouseCursor).UnitVector();
-				float impulseMagnitude = (particles[numberOfParticles - 1]->Position - mouseCursor).Magnitude() * 5.0;
-				particles[numberOfParticles - 1]->Velocity = impulseDirection * impulseMagnitude;
+				Vec2 impulseDirection = (bodys[numberOfBodys - 1]->Position - mouseCursor).UnitVector();
+				float impulseMagnitude = (bodys[numberOfBodys - 1]->Position - mouseCursor).Magnitude() * 5.0;
+				bodys[numberOfBodys - 1]->Velocity = impulseDirection * impulseMagnitude;
 			}
 			break;
 		}
@@ -127,103 +123,109 @@ void Application::Update()
 
 	timePreviousFrame = SDL_GetTicks();
 
-	// particle->Acceleration = Vec2(0.f, 9.8f * PIXEL_PER_METER);
+	// body->Acceleration = Vec2(0.f, 9.8f * PIXEL_PER_METER);
 
 	//Vec2 wind = Vec2(0.4f * PIXEL_PER_METER, 0);
 	
-	// Vec2 gravitationalForce = Force::GenerateGravitationalForce(particles[0], particles[1], 1000.f, 10, 50);
-	//particles[0]->AddForce(gravitationalForce);
-	//particles[1]->AddForce(-gravitationalForce);
+	// Vec2 gravitationalForce = Force::GenerateGravitationalForce(bodys[0], bodys[1], 1000.f, 10, 50);
+	//bodys[0]->AddForce(gravitationalForce);
+	//bodys[1]->AddForce(-gravitationalForce);
 
-	Vec2 springForce = Force::GenerateSpringForce(particles[0], anchor, restLength, K);
-	particles[0]->AddForce(springForce);
+	Vec2 springForce = Force::GenerateSpringForce(bodys[0], anchor, restLength, K);
+	bodys[0]->AddForce(springForce);
 
-	for (int i = 1; i < numberOfParticles; i++)
+	for (int i = 1; i < numberOfBodys; i++)
 	{
-		Particle* currentParticle = particles[i];
-		Particle* previousParticle = particles[i-1];
+		Body* currentBody = bodys[i];
+		Body* previousBody = bodys[i-1];
 
-		springForce = Force::GenerateSpringForce(currentParticle, previousParticle, restLength, K);
+		springForce = Force::GenerateSpringForce(currentBody, previousBody, restLength, K);
 		
-		currentParticle->AddForce(springForce);
-		previousParticle->AddForce(-springForce);
+		currentBody->AddForce(springForce);
+		previousBody->AddForce(-springForce);
 
-		//currentParticle->AddForce(PushForce);
-		//particle->AddForce(Vec2(0.f, 9.8f) * particle->Mass * PIXEL_PER_METER);
-		//Vec2 friction = Force::GenerateFrictionForce(currentParticle->Velocity, 0.002f);
-		//currentParticle->AddForce(friction);
-		//currentParticle->Integrate(deltaTime);
+		//currentBody->AddForce(PushForce);
+		//body->AddForce(Vec2(0.f, 9.8f) * body->Mass * PIXEL_PER_METER);
+		//Vec2 friction = Force::GenerateFrictionForce(currentBody->Velocity, 0.002f);
+		//currentBody->AddForce(friction);
+		//currentBody->Integrate(deltaTime);
 
-		//if (particle->Position.y > Graphics::Height() - FluidRect.h)
+		//if (body->Position.y > Graphics::Height() - FluidRect.h)
 		//{
-		//	Vec2 dragForce = Force::GenerateDragForce(particle->Velocity, 0.06f);
-		//	particle->AddForce(dragForce);
+		//	Vec2 dragForce = Force::GenerateDragForce(body->Velocity, 0.06f);
+		//	body->AddForce(dragForce);
 		//}
 		//else
-			//particle->AddForce(wind);
+			//body->AddForce(wind);
 
 
 
 
-		//if (particle->Position.x + particle->Radius <= 0)
+		//if (body->Position.x + body->Radius <= 0)
 		//{
-		//	particle->Position.x = particle->Radius;
-		//	particle->Velocity.x *= -1.f;
+		//	body->Position.x = body->Radius;
+		//	body->Velocity.x *= -1.f;
 		//}
 
-		//else if (particle->Position.x + particle->Radius >= Graphics::Width())
+		//else if (body->Position.x + body->Radius >= Graphics::Width())
 		//{
-		//	particle->Position.x = Graphics::Width() - particle->Radius;
-		//	particle->Velocity.x *= -1.f;
+		//	body->Position.x = Graphics::Width() - body->Radius;
+		//	body->Velocity.x *= -1.f;
 		//}
 
-		//if (particle->Position.y + particle->Radius <= 0)
+		//if (body->Position.y + body->Radius <= 0)
 		//{
-		//	particle->Position.y = particle->Radius;
-		//	particle->Velocity.y *= -1.f;
+		//	body->Position.y = body->Radius;
+		//	body->Velocity.y *= -1.f;
 		//}
 
-		//else if (particle->Position.y + particle->Radius >= Graphics::Height())
+		//else if (body->Position.y + body->Radius >= Graphics::Height())
 		//{
-		//	particle->Position.y = Graphics::Height() - particle->Radius;
-		//	particle->Velocity.y *= -1.f;
+		//	body->Position.y = Graphics::Height() - body->Radius;
+		//	body->Velocity.y *= -1.f;
 		//}
 	}
 
 
 
-	for (Particle* particle : particles)
+	for (Body* body : bodys)
 	{
-		particle->AddForce(PushForce);
-		particle->AddForce(Vec2(0.f, g) * particle->Mass * PIXEL_PER_METER);
-		Vec2 friction = Force::GenerateFrictionForce(particle->Velocity, 0.005f);
-		particle->AddForce(friction);
+		body->AddTorque(100.f);
+		body->AddForce(PushForce);
+		body->AddForce(Vec2(0.f, g) * body->Mass * PIXEL_PER_METER);
+		Vec2 friction = Force::GenerateFrictionForce(body->Velocity, 0.005f);
+		body->AddForce(friction);
 
-		particle->Integrate(deltaTime);
+		body->IntegrateLinear(deltaTime);
+		body->IntegrateAngular(deltaTime);
 
 
-		if (particle->Position.x + particle->Radius <= 0)
+		if (body->shape->GetType() == CIRCLE)
 		{
-			particle->Position.x = particle->Radius;
-			particle->Velocity.x *= -1.f;
-		}
+			CircleShape* circleShape = (CircleShape*)body->shape;
+			if (body->Position.x + circleShape->radius <= 0)
+			{
+				body->Position.x = circleShape->radius;
+				body->Velocity.x *= -1.f;
+			}
 
-		else if (particle->Position.x + particle->Radius >= Graphics::Width())
-		{
-			particle->Position.x = Graphics::Width() - particle->Radius;
-			particle->Velocity.x *= -1.f;
-		}
+			else if (body->Position.x + circleShape->radius >= Graphics::Width())
+			{
+				body->Position.x = Graphics::Width() - circleShape->radius;
+				body->Velocity.x *= -1.f;
+			}
 
-		if (particle->Position.y + particle->Radius <= 0)
-		{
-			particle->Position.y = particle->Radius;
-			particle->Velocity.y *= -1.f;
-		}
+			if (body->Position.y + circleShape->radius <= 0)
+			{
+				body->Position.y = circleShape->radius;
+				body->Velocity.y *= -1.f;
+			}
 
-		else if (particle->Position.y + particle->Radius >= Graphics::Height())
-		{
-			particle->Position.y = Graphics::Height() - particle->Radius;
-			particle->Velocity.y *= -1.f;
+			else if (body->Position.y + circleShape->radius >= Graphics::Height())
+			{
+				body->Position.y = Graphics::Height() - circleShape->radius;
+				body->Velocity.y *= -1.f;
+			}
 		}
 	}
 
@@ -242,20 +244,27 @@ void Application::Render()
 
 	Graphics::DrawFillCircle(anchor.x, anchor.y, 5, 0xFF000000); // anchor
 
-	Graphics::DrawLine(anchor.x, anchor.y, particles[0]->Position.x, particles[0]->Position.y, 0xFFFF0000);
+	Graphics::DrawLine(anchor.x, anchor.y, bodys[0]->Position.x, bodys[0]->Position.y, 0xFFFF0000);
+	
 
-
-	for (int i = 0; i < numberOfParticles - 1; i++)
+	for (int i = 0; i < numberOfBodys - 1; i++)
 	{
-		Particle* particle = particles[i];
-		Graphics::DrawLine(particle->Position.x, particle->Position.y, particles[i+1]->Position.x, particles[i+1]->Position.y, 0xFFFF0000);
-		Graphics::DrawFillCircle(particle->Position.x, particle->Position.y, particle->Radius, 0xFFFF3333);
+		Body* body = bodys[i];
+		if (body->shape->GetType() == CIRCLE)
+		{
+			CircleShape* circleShape = (CircleShape*)body->shape;
+			Graphics::DrawLine(body->Position.x, body->Position.y, bodys[i+1]->Position.x, bodys[i+1]->Position.y, 0xFFFF0000);
+			Graphics::DrawCircle(body->Position.x, body->Position.y, circleShape->radius, body->rotation, 0xFFFF3333);
+		}
 	}
-	Graphics::DrawFillCircle(particles[numberOfParticles - 1]->Position.x, particles[numberOfParticles - 1]->Position.y, particles[numberOfParticles - 1]->Radius, 0xFFFF3333);
-
+	if (bodys[numberOfBodys - 1]->shape->GetType() == CIRCLE)
+	{
+		CircleShape* circleShape = (CircleShape*)bodys[numberOfBodys - 1]->shape;
+		Graphics::DrawCircle(bodys[numberOfBodys - 1]->Position.x, bodys[numberOfBodys - 1]->Position.y, circleShape->radius, bodys[numberOfBodys - 1]->rotation, 0xFFFF3333);
+	}
 
 	if (rightMouseButtonDown) {
-		Graphics::DrawLine(particles[numberOfParticles-1]->Position.x, particles[numberOfParticles - 1]->Position.y, mouseCursor.x, mouseCursor.y, 0xFFFF00FF);
+		Graphics::DrawLine(bodys[numberOfBodys-1]->Position.x, bodys[numberOfBodys - 1]->Position.y, mouseCursor.x, mouseCursor.y, 0xFFFF00FF);
 	}
 	Graphics::RenderFrame();
 }
@@ -263,8 +272,8 @@ void Application::Render()
 
 void Application:: Destroy()
 {
-	for (Particle* particle : particles)
-		delete particle;
+	for (Body* body : bodys)
+		delete body;
 
 	Graphics::CloseWindow();
 }

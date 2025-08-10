@@ -31,21 +31,21 @@ Vec2 Force::GenerateFrictionForce(const Vec2& Velocity, float k)
 	return FrictionForce;
 }
 
-Vec2 Force::GenerateGravitationalForce(const Particle* ParticleA, const Particle* ParticleB, float G, float DistanceMin, float DistanceMax)
+Vec2 Force::GenerateGravitationalForce(const Body* BodyA, const Body* BodyB, float G, float DistanceMin, float DistanceMax)
 {
-	Vec2 distance = (ParticleB->Position - ParticleA->Position);
+	Vec2 distance = (BodyB->Position - BodyA->Position);
 
 	float distanceSquaredMagnitude = distance.MagnitudeSquared();
 	distanceSquaredMagnitude = std::clamp(distanceSquaredMagnitude, DistanceMin, DistanceMax);
 
 	Vec2 normalizedDistance = distance.UnitVector();
 
-	return (normalizedDistance * (G * ParticleA->Mass * ParticleB->Mass)) / distanceSquaredMagnitude;
+	return (normalizedDistance * (G * BodyA->Mass * BodyB->Mass)) / distanceSquaredMagnitude;
 }
 
-Vec2 Force::GenerateSpringForce(const Particle* particle, const Vec2& anchor, const float& rest, const float& K)
+Vec2 Force::GenerateSpringForce(const Body* body, const Vec2& anchor, const float& rest, const float& K)
 {
-	Vec2 distance = particle->Position - anchor;
+	Vec2 distance = body->Position - anchor;
 
 	float displacement = distance.Magnitude() - rest;
 
@@ -56,9 +56,9 @@ Vec2 Force::GenerateSpringForce(const Particle* particle, const Vec2& anchor, co
 	return springForce;
 }
 
-Vec2 Force::GenerateSpringForce(const Particle* particleA, const Particle* particleB, const float& rest, const float& K)
+Vec2 Force::GenerateSpringForce(const Body* bodyA, const Body* bodyB, const float& rest, const float& K)
 {
-	Vec2 distance = particleA->Position - particleB->Position;
+	Vec2 distance = bodyA->Position - bodyB->Position;
 
 	float displacement = distance.Magnitude() - rest;
 
