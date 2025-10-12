@@ -1,6 +1,6 @@
 #include "Body.h"
 
-Body::Body(const Shape& shape, Vec2 Position, float Mass, float Radius)
+Body::Body(const Shape& shape, Vec2 Position, float Mass)
 {
 	this->shape = shape.Clone();
 	this->Position = Position;

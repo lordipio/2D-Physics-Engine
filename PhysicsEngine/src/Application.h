@@ -12,7 +12,7 @@ class Application
 private:
 	bool isRunning = false;
 
-	std::vector<Body*> bodys;
+	std::vector<Body*> bodies;
 
 	Vec2 PushForce = Vec2(0.f, 0.f);
 

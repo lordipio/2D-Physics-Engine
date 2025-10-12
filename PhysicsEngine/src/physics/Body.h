@@ -6,7 +6,7 @@
 
 struct Body
 {
-	Body(const Shape& shape, Vec2 Position, float Mass, float Radius);
+	Body(const Shape& shape, Vec2 Position, float Mass);
 	~Body();
 
 	Vec2 Position;
