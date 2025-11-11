@@ -1,7 +1,8 @@
 #include "Body.h"
 
-Body::Body(const Shape& shape, Vec2 Position, float Mass)
+Body::Body(const Shape& shape, Vec2 Position, float Mass, float restitution)
 {
+	this->restitution = restitution;
 	this->shape = shape.Clone();
 	this->Position = Position;
 	this->Velocity = Vec2(0, 0);
@@ -31,6 +32,9 @@ Body::~Body()
 
 void Body::IntegrateLinear(float dt)
 {
+	if (IsStatic())
+		return;
+
 	this->Acceleration = sumForces *  this->InverseMass;
 	this->Velocity += this->Acceleration * dt;
 	this->Position += this->Velocity * dt;
@@ -40,6 +44,9 @@ void Body::IntegrateLinear(float dt)
 
 void Body::IntegrateAngular(float dt)
 {
+	if (IsStatic())
+		return;
+
 	this->angularAcceleration = sumTorques * this->inverseI;
 	this->angularVelocity += this->angularAcceleration * dt;
 	this->rotation += this->angularVelocity * dt;
@@ -68,3 +75,28 @@ void Body::ClearAngularForce()
 	this->sumTorques = 0;
 }
 
+void Body::Update(float deltaTime)
+{
+	
+	IntegrateLinear(deltaTime);
+	IntegrateAngular(deltaTime);
+	
+
+	bool isPolygon = shape->GetType() == POLYGON || shape->GetType() == BOX;
+	if (isPolygon)
+	{
+		PolygonShape* polygonBody = (PolygonShape*)shape;
+		polygonBody->UpdateVertices(rotation, Position);
+	}
+}
+
+bool Body::IsStatic() const
+{
+	return InverseMass < 0.005f;
+}
+
+
+void Body::ApplyImpulse(Vec2 J)
+{
+	Velocity += J * InverseMass;
+}

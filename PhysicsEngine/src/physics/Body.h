@@ -6,8 +6,10 @@
 
 struct Body
 {
-	Body(const Shape& shape, Vec2 Position, float Mass);
+	Body(const Shape& shape, Vec2 Position, float Mass, float restitution);
 	~Body();
+
+	bool isCollided = false;
 
 	Vec2 Position;
 	Vec2 Acceleration;
@@ -28,6 +30,8 @@ struct Body
 	float I;
 	float inverseI;
 
+	float restitution;
+
 	void IntegrateLinear(float dt);
 	void IntegrateAngular(float dt);
 
@@ -37,6 +41,12 @@ struct Body
 
 	void ClearLinearForce();
 	void ClearAngularForce();
+
+	void Update(float deltaTime);
+
+	void ApplyImpulse(Vec2 J);
+
+	bool IsStatic() const;
 
 };
 

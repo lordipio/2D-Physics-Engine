@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "physics/Contact.h"
 
 bool Application::IsRunning()
 {
@@ -9,8 +10,13 @@ void Application::Setup()
 {
 	isRunning = Graphics::OpenWindow();
 
-	Body* body = new Body(CircleShape(50), Vec2(Graphics::Width() / 2.0, Graphics::Height() / 2.0), 1.0);
-	bodies.push_back(body);
+	//Body* body = new Body(CircleShape(50), Vec2(Graphics::Width() / 2.0, Graphics::Height() / 2.0), 1.0);
+	//Body* body = new Body(BoxShape(200, 100), Vec2(Graphics::Width() / 2.0, Graphics::Height() / 2.0), 1.0);
+	Body* circle1 = new Body(CircleShape(100.f), Vec2(300, 300), 1, 1);
+	Body* circle2 = new Body(CircleShape(200.f), Vec2(600, 600), 0, 1);
+
+	bodies.push_back(circle1);
+	bodies.push_back(circle2);
 	
 	// anchor = Vec2(Graphics::Width() / 2, 10.f);
 
@@ -48,10 +54,17 @@ void Application::Input()
 			if (event.key.keysym.sym == SDLK_ESCAPE)
 				isRunning = false;
 			break;
+
 		case SDL_MOUSEBUTTONDOWN:
 			int x, y;
 			SDL_GetMouseState(&x, &y);
+			bodies.push_back(new Body(CircleShape(20.f), Vec2(x, y), 1.f, 1.f));
 			break;
+		//case SDL_MOUSEMOTION:
+		//	int x, y;
+		//	SDL_GetMouseState(&x, &y);
+		//	bodies[0]->Position = Vec2(x, y);
+		//	break;
 		}
 	}
 
@@ -137,6 +150,8 @@ void Application::Input()
 
 void Application::Update()
 {
+	Graphics::ClearScreen(0xFF056263);
+
 	static int timePreviousFrame;
 	int timeToWait = MILLISECS_PER_FRAME - (SDL_GetTicks() - timePreviousFrame);
 	if (timeToWait > 0)
@@ -209,19 +224,22 @@ void Application::Update()
 		//}
 	//}
 
-
-
+	Vec2 windForce = Vec2(10 * PIXEL_PER_METER, 0);
+	Vec2 weight = Vec2(0.f, 1.f);
 	for (Body* body : bodies)
 	{
-		//body->AddTorque(100.f);
 		//body->AddForce(PushForce);
-		body->AddForce(Vec2(0.f, g) * body->Mass * PIXEL_PER_METER);
 		//Vec2 friction = Force::GenerateFrictionForce(body->Velocity, 0.005f);
 		//body->AddForce(friction);
+		//body->AddTorque(600.f);
+		//body->AddForce(Vec2(0.f, g) * body->Mass * PIXEL_PER_METER);
+		
+		weight = Vec2(0.f, body->Mass * 9.8 *PIXEL_PER_METER);
+		
+		body->AddForce(weight);
+		//body->AddForce(windForce);
 
-		body->IntegrateLinear(deltaTime);
-		//body->IntegrateAngular(deltaTime);
-
+		body->Update(deltaTime);
 
 		if (body->shape->GetType() == CIRCLE)
 		{
@@ -251,31 +269,56 @@ void Application::Update()
 			}
 		}
 	}
+	
+
+	for (int i = 0; i < bodies.size() - 1; i++)
+		for (int j = i + 1; j < bodies.size(); j++)
+		{
+			bodies[i]->isCollided = false;
+			bodies[j]->isCollided = false;
+		}
 
 
+	for(int i = 0; i <= bodies.size() - 1; i++)
+		for (int j = i + 1; j < bodies.size(); j++)
+		{
+			Contact contact;
+
+			if (CollisionDetection::isColliding(bodies[i], bodies[j], contact))
+			{
+				Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFF00FFFF);
+				Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFF00FFFF);
+				Graphics::DrawLine(contact.body1->Position.x, contact.body1->Position.y, contact.body1->Position.x + contact.normal.x * 20, contact.body1->Position.y + contact.normal.y * 20, 0xFF00FFFF);
+
+				bodies[i]->isCollided = true;
+				bodies[j]->isCollided = true;
+				contact.ResolveCollision();
+			}
+		}
 
 }
 
 
 void Application::Render()
 {
-	Graphics::ClearScreen(0xFF056263);
 
-	static float angle = 0.0;
 
 	for (auto body : bodies)
 	{
 		if (body->shape->GetType() == CIRCLE)
 		{
 			CircleShape* circleShape = (CircleShape*)body->shape;
-			Graphics::DrawCircle(body->Position.x, body->Position.y, circleShape->radius, angle, 0xFFFFFFFF);
+			body->isCollided ? Graphics::DrawCircle(body->Position.x, body->Position.y, circleShape->radius, body->rotation, 0xFF0000FF) : Graphics::DrawCircle(body->Position.x, body->Position.y, circleShape->radius, body->rotation, 0xFFFFFFFF);
 		}
-		else
+		else if (body->shape->GetType() == BOX)
 		{
-
+			BoxShape* boxShape = (BoxShape*)body->shape;
+			Graphics::DrawPolygon(body->Position.x, body->Position.y, boxShape->worldVertices, 0xFFFFFFFF);
 		}
 	}
-	angle += 0.01f;
+
+
+
 	// Graphics::DrawFillRect(FluidRect.x + FluidRect.w / 2, FluidRect.y + FluidRect.h / 2, FluidRect.w, FluidRect.h, 0xFFFF0000);
 
 	//Graphics::DrawFillCircle(anchor.x, anchor.y, 5, 0xFF000000); // anchor

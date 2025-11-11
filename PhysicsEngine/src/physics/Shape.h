@@ -32,13 +32,15 @@ struct CircleShape : public Shape
 
 struct PolygonShape : public Shape
 {
-	std::vector<Vec2> vertices;
+	std::vector<Vec2> localVertices;
+	std::vector<Vec2> worldVertices;
 	PolygonShape() = default;
 	PolygonShape(const std::vector<Vec2>& vertices);
 	virtual ~PolygonShape();
 	virtual ShapeType GetType() const override;
 	virtual Shape* Clone() const override;
 	virtual float GetMomentOfInertia() const override;
+	virtual void UpdateVertices(float angle, const Vec2& position);
 
 };
 

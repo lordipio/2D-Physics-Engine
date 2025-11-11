@@ -165,7 +165,9 @@
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Graphics.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\physics\CollisionDetection.cpp" />
     <ClCompile Include="src\physics\Constants.cpp" />
+    <ClCompile Include="src\physics\Contact.cpp" />
     <ClCompile Include="src\physics\Force.cpp" />
     <ClCompile Include="src\physics\Body.cpp" />
     <ClCompile Include="src\physics\Shape.cpp" />
@@ -178,7 +180,9 @@
     <ClInclude Include="lib\SDL2_gfx\SDL2_rotozoom.h" />
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\Graphics.h" />
+    <ClInclude Include="src\physics\CollisionDetection.h" />
     <ClInclude Include="src\physics\Constants.h" />
+    <ClInclude Include="src\physics\Contact.h" />
     <ClInclude Include="src\physics\Force.h" />
     <ClInclude Include="src\physics\Body.h" />
     <ClInclude Include="src\physics\Shape.h" />

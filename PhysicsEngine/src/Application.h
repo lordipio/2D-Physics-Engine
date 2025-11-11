@@ -5,6 +5,7 @@
 #include "physics/Body.h"
 #include "physics/Constants.h"
 #include "physics/Force.h"
+#include "physics/CollisionDetection.h"
 #include <vector>
 
 class Application
