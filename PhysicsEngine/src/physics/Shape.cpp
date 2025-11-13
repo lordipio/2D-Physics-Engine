@@ -45,6 +45,11 @@ Shape* PolygonShape::Clone() const
 	return new PolygonShape(this->localVertices);
 }
 
+Vec2 PolygonShape::EdgeAt(int index)
+{
+	return worldVertices[(index + 1) % worldVertices.size()] - worldVertices[index];
+}
+
 float PolygonShape::GetMomentOfInertia() const
 {
 	return 0.0f;

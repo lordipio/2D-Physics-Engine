@@ -41,6 +41,7 @@ struct PolygonShape : public Shape
 	virtual Shape* Clone() const override;
 	virtual float GetMomentOfInertia() const override;
 	virtual void UpdateVertices(float angle, const Vec2& position);
+	virtual Vec2 EdgeAt(int index);
 
 };
 

@@ -8,6 +8,8 @@ struct CollisionDetection
 {
 	static bool isColliding(Body* body1, Body* body2, Contact& contact);
 	static bool isCollidingCircleCircle(Body* circleBody1, Body* circleBody2, Contact& contact);
+	static bool IsCollidingPolygonPolygon(Body* a, Body* b, Contact contact);
+	static float FindMinSeparation(PolygonShape* a, PolygonShape* b);
 };
 
 #endif // !COLLISION_DETECTION_H

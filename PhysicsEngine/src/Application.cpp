@@ -12,11 +12,17 @@ void Application::Setup()
 
 	//Body* body = new Body(CircleShape(50), Vec2(Graphics::Width() / 2.0, Graphics::Height() / 2.0), 1.0);
 	//Body* body = new Body(BoxShape(200, 100), Vec2(Graphics::Width() / 2.0, Graphics::Height() / 2.0), 1.0);
-	Body* circle1 = new Body(CircleShape(100.f), Vec2(300, 300), 1, 1);
-	Body* circle2 = new Body(CircleShape(200.f), Vec2(600, 600), 0, 1);
+	//Body* circle1 = new Body(CircleShape(100.f), Vec2(300, 300), 1, 1);
+	//Body* circle2 = new Body(CircleShape(200.f), Vec2(600, 600), 0, 1);
 
-	bodies.push_back(circle1);
-	bodies.push_back(circle2);
+	Body* boxA = new Body(BoxShape(200.f, 100.f), Vec2(300, 300), 1, 1);
+	Body* boxB = new Body(BoxShape(400.f, 200.f), Vec2(600, 600), 1, 1);
+
+	boxA->angularVelocity = -1.f;
+	boxB->angularVelocity = 0.5f;
+
+	bodies.push_back(boxA);
+	bodies.push_back(boxB);
 	
 	// anchor = Vec2(Graphics::Width() / 2, 10.f);
 
@@ -55,16 +61,16 @@ void Application::Input()
 				isRunning = false;
 			break;
 
-		case SDL_MOUSEBUTTONDOWN:
-			int x, y;
-			SDL_GetMouseState(&x, &y);
-			bodies.push_back(new Body(CircleShape(20.f), Vec2(x, y), 1.f, 1.f));
-			break;
-		//case SDL_MOUSEMOTION:
+		//case SDL_MOUSEBUTTONDOWN:
 		//	int x, y;
 		//	SDL_GetMouseState(&x, &y);
-		//	bodies[0]->Position = Vec2(x, y);
+		//	bodies.push_back(new Body(CircleShape(20.f), Vec2(x, y), 1.f, 1.f));
 		//	break;
+		case SDL_MOUSEMOTION:
+			int x, y;
+			SDL_GetMouseState(&x, &y);
+			bodies[0]->Position = Vec2(x, y);
+			break;
 		}
 	}
 
@@ -150,7 +156,6 @@ void Application::Input()
 
 void Application::Update()
 {
-	Graphics::ClearScreen(0xFF056263);
 
 	static int timePreviousFrame;
 	int timeToWait = MILLISECS_PER_FRAME - (SDL_GetTicks() - timePreviousFrame);
@@ -234,9 +239,9 @@ void Application::Update()
 		//body->AddTorque(600.f);
 		//body->AddForce(Vec2(0.f, g) * body->Mass * PIXEL_PER_METER);
 		
-		weight = Vec2(0.f, body->Mass * 9.8 *PIXEL_PER_METER);
+		//weight = Vec2(0.f, body->Mass * 9.8 *PIXEL_PER_METER);
 		
-		body->AddForce(weight);
+		//body->AddForce(weight);
 		//body->AddForce(windForce);
 
 		body->Update(deltaTime);
@@ -286,13 +291,13 @@ void Application::Update()
 
 			if (CollisionDetection::isColliding(bodies[i], bodies[j], contact))
 			{
-				Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFF00FFFF);
-				Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFF00FFFF);
-				Graphics::DrawLine(contact.body1->Position.x, contact.body1->Position.y, contact.body1->Position.x + contact.normal.x * 20, contact.body1->Position.y + contact.normal.y * 20, 0xFF00FFFF);
+				//Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFF00FFFF);
+				//Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFF00FFFF);
+				//Graphics::DrawLine(contact.body1->Position.x, contact.body1->Position.y, contact.body1->Position.x + contact.normal.x * 20, contact.body1->Position.y + contact.normal.y * 20, 0xFF00FFFF);
 
 				bodies[i]->isCollided = true;
 				bodies[j]->isCollided = true;
-				contact.ResolveCollision();
+				//contact.ResolveCollision();
 			}
 		}
 
@@ -301,19 +306,22 @@ void Application::Update()
 
 void Application::Render()
 {
+	Graphics::ClearScreen(0xFF056263);
 
 
 	for (auto body : bodies)
 	{
+		Uint32 color = body->isCollided ? 0xFF0000FF : 0xFFFFFFFF;
+
 		if (body->shape->GetType() == CIRCLE)
 		{
 			CircleShape* circleShape = (CircleShape*)body->shape;
-			body->isCollided ? Graphics::DrawCircle(body->Position.x, body->Position.y, circleShape->radius, body->rotation, 0xFF0000FF) : Graphics::DrawCircle(body->Position.x, body->Position.y, circleShape->radius, body->rotation, 0xFFFFFFFF);
+			body->isCollided ? Graphics::DrawCircle(body->Position.x, body->Position.y, circleShape->radius, body->rotation, color) : Graphics::DrawCircle(body->Position.x, body->Position.y, circleShape->radius, body->rotation, 0xFFFFFFFF);
 		}
 		else if (body->shape->GetType() == BOX)
 		{
 			BoxShape* boxShape = (BoxShape*)body->shape;
-			Graphics::DrawPolygon(body->Position.x, body->Position.y, boxShape->worldVertices, 0xFFFFFFFF);
+			Graphics::DrawPolygon(body->Position.x, body->Position.y, boxShape->worldVertices, color);
 		}
 	}
 
