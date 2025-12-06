@@ -1,7 +1,10 @@
 #include "Body.h"
+#include "E:\Projects\PhysicsEngine\PhysicsEngine\src\Graphics.h"
 
-Body::Body(const Shape& shape, Vec2 Position, float Mass, float restitution)
+
+Body::Body(const Shape& shape, Vec2 Position, float Mass, float restitution, float friction)
 {
+	this->friction = friction;
 	this->restitution = restitution;
 	this->shape = shape.Clone();
 	this->Position = Position;
@@ -28,6 +31,7 @@ Body::Body(const Shape& shape, Vec2 Position, float Mass, float restitution)
 Body::~Body()
 {
 	delete this->shape;
+	SDL_DestroyTexture(texture);
 }
 
 void Body::IntegrateLinear(float dt)
@@ -54,6 +58,15 @@ void Body::IntegrateAngular(float dt)
 	ClearAngularForce();
 }
 
+void Body::SetTexture(const char* texturePath)
+{
+	if (SDL_Surface* surface = IMG_Load(texturePath))
+	{
+		texture = SDL_CreateTextureFromSurface(Graphics::renderer, surface);
+		SDL_FreeSurface(surface);
+	}
+}
+
 void Body::AddForce(const Vec2& Force)
 {
 	sumForces += Force;
@@ -77,17 +90,10 @@ void Body::ClearAngularForce()
 
 void Body::Update(float deltaTime)
 {
-	
 	IntegrateLinear(deltaTime);
 	IntegrateAngular(deltaTime);
 	
-
-	bool isPolygon = shape->GetType() == POLYGON || shape->GetType() == BOX;
-	if (isPolygon)
-	{
-		PolygonShape* polygonBody = (PolygonShape*)shape;
-		polygonBody->UpdateVertices(rotation, Position);
-	}
+	shape->UpdateVertices(rotation, Position);
 }
 
 bool Body::IsStatic() const
@@ -96,7 +102,14 @@ bool Body::IsStatic() const
 }
 
 
-void Body::ApplyImpulse(Vec2 J)
+void Body::ApplyImpulse(const Vec2& J)
 {
 	Velocity += J * InverseMass;
+}
+
+void Body::ApplyImpulse(const Vec2& J, const Vec2& r)
+{
+	Velocity += J * InverseMass;
+
+	angularVelocity += r.Cross(J) * inverseI;
 }

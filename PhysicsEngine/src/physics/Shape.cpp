@@ -20,6 +20,11 @@ Shape* CircleShape::Clone() const
 	return new CircleShape(this->radius);
 }
 
+void CircleShape::UpdateVertices(float angle, const Vec2& position)
+{
+	
+}
+
 float CircleShape::GetMomentOfInertia() const
 {
 	return 0.5f * radius * radius;
@@ -28,6 +33,7 @@ float CircleShape::GetMomentOfInertia() const
 PolygonShape::PolygonShape(const std::vector<Vec2>& vertices)
 {
 	this->localVertices = vertices;
+	this->worldVertices = vertices;
 }
 
 PolygonShape::~PolygonShape()
@@ -45,14 +51,15 @@ Shape* PolygonShape::Clone() const
 	return new PolygonShape(this->localVertices);
 }
 
-Vec2 PolygonShape::EdgeAt(int index)
+Vec2 PolygonShape::EdgeAt(int index) const
 {
 	return worldVertices[(index + 1) % worldVertices.size()] - worldVertices[index];
 }
 
 float PolygonShape::GetMomentOfInertia() const
 {
-	return 0.0f;
+	// Implement Moment of Inertia Here!
+	return 5000.f;
 }
 
 void PolygonShape::UpdateVertices(float angle, const Vec2& position)
@@ -98,4 +105,37 @@ Shape* BoxShape::Clone() const
 float BoxShape::GetMomentOfInertia() const
 {
 	return 0.08333f * ((width * width) + (height * height));
+}
+
+float PolygonShape::FindMinSeparation(const PolygonShape* other, Vec2& axis, Vec2& point) const
+{
+	float separation = std::numeric_limits<float>::lowest();
+	for (int i = 0; i < this->worldVertices.size(); i++)
+	{
+		Vec2 va = this->worldVertices[i];
+		Vec2 normal = this->EdgeAt(i).Normal();
+		Vec2 minVertex;
+
+		float minStep = std::numeric_limits<float>::max();
+
+		for (int j = 0; j < other->worldVertices.size(); j++)
+		{
+			Vec2 vb = other->worldVertices[j];
+			float project = normal.Dot(vb - va);
+			if (minStep > project)
+			{
+				minStep = project;
+				minVertex = vb;
+			}
+		}
+
+		if (minStep > separation)
+		{
+			separation = minStep;
+			point = minVertex;
+			axis = this->EdgeAt(i);
+		}
+	}
+
+	return separation;
 }

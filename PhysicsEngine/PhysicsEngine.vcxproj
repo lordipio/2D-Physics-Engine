@@ -172,6 +172,7 @@
     <ClCompile Include="src\physics\Body.cpp" />
     <ClCompile Include="src\physics\Shape.cpp" />
     <ClCompile Include="src\physics\Vec2.cpp" />
+    <ClCompile Include="src\physics\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\SDL2_gfx\SDL2_gfxPrimitives.h" />
@@ -187,6 +188,7 @@
     <ClInclude Include="src\physics\Body.h" />
     <ClInclude Include="src\physics\Shape.h" />
     <ClInclude Include="src\physics\Vec2.h" />
+    <ClInclude Include="src\physics\World.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libavif-16.dll" />

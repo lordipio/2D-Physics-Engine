@@ -3,10 +3,12 @@
 
 #include "Vec2.h"
 #include "Shape.h"
+#include <SDL.h>
+#include <SDL_image.h>
 
 struct Body
 {
-	Body(const Shape& shape, Vec2 Position, float Mass, float restitution);
+	Body(const Shape& shape, Vec2 Position, float Mass, float restitution = 0.1f, float friction = 1.f);
 	~Body();
 
 	bool isCollided = false;
@@ -31,6 +33,11 @@ struct Body
 	float inverseI;
 
 	float restitution;
+	float friction;
+
+	SDL_Texture* texture = nullptr;
+
+	void SetTexture(const char* texturePath);
 
 	void IntegrateLinear(float dt);
 	void IntegrateAngular(float dt);
@@ -44,7 +51,9 @@ struct Body
 
 	void Update(float deltaTime);
 
-	void ApplyImpulse(Vec2 J);
+	void ApplyImpulse(const Vec2& J);
+	void ApplyImpulse(const Vec2& J, const Vec2& r);
+
 
 	bool IsStatic() const;
 

@@ -6,14 +6,17 @@
 #include "physics/Constants.h"
 #include "physics/Force.h"
 #include "physics/CollisionDetection.h"
+#include "physics/World.h"
 #include <vector>
 
 class Application
 {
 private:
 	bool isRunning = false;
+	bool isInDebugMode = false;
 
-	std::vector<Body*> bodies;
+	World* world;
+	// std::vector<Body*> bodies;
 
 	Vec2 PushForce = Vec2(0.f, 0.f);
 
