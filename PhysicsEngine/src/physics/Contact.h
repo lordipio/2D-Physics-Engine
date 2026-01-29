@@ -5,8 +5,8 @@
 
 struct Contact
 {
-	Body* body1;
-	Body* body2;
+	Body* a;
+	Body* b;
 
 	Vec2 start;
 	Vec2 end;

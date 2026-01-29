@@ -1,15 +1,14 @@
-#ifndef COLLISION_DETECTION_H
-#define COLLISION_DETECTION_H
+#ifndef COLLISIONDETECTION_H
+#define COLLISIONDETECTION_H
 
 #include "Body.h"
 #include "Contact.h"
 
-struct CollisionDetection
-{
-	static bool isColliding(Body* body1, Body* body2, Contact& contact);
-	static bool isCollidingCircleCircle(Body* circleBody1, Body* circleBody2, Contact& contact);
-	static bool IsCollidingPolygonPolygon(Body* a, Body* b, Contact& contact);
-	static bool IsCollidingPolygonCircle(Body* polygonBody, Body* circleBody, Contact& contact);
+struct CollisionDetection {
+    static bool IsColliding(Body* a, Body* b, std::vector<Contact>& contacts);
+    static bool IsCollidingCircleCircle(Body* a, Body* b, std::vector<Contact>& contacts);
+    static bool IsCollidingPolygonPolygon(Body* a, Body* b, std::vector<Contact>& contacts);
+    static bool IsCollidingPolygonCircle(Body* polygon, Body* circle, std::vector<Contact>& contacts);
 };
 
-#endif // !COLLISION_DETECTION_H
+#endif

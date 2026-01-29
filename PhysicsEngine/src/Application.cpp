@@ -14,13 +14,36 @@ void Application::Setup()
 
 
 	Body* floor = new Body(BoxShape(Graphics::Width() - 100, 100.f), Vec2(Graphics::Width()/2, Graphics::Height() - 100), 0, 1.f);
-	Body* boxB = new Body(BoxShape(200.f, 100.f), Vec2(Graphics::Width() / 2, Graphics::Height()/2), 0, 0.4);
+	Body* boxB = new Body(BoxShape(200.f, 200.f), Vec2(Graphics::Width() / 2, Graphics::Height()/2), 0);
 	boxB->SetTexture("./assets/crate.png");
 	
-	boxB->rotation = -2.f;
-
+	// boxB->rotation = -2.f;
+	
 	world->AddBody(floor);
 	world->AddBody(boxB);
+
+	//const int numberOfBodies = 8;
+	//for (int i = 0; i < numberOfBodies; i++)
+	//{
+	//	Body* b = new Body(BoxShape(20, 20), Vec2(Graphics::Width()/2.f + i * 10.f, 50.f + i * 20.f), i == 0 ? 0 : 1);
+	//	world->AddBody(b);
+
+	//	if (i > 0)
+	//	{
+	//		std::vector<Body*> bodies = *world->GetBodies();
+	//		JointConstraint* joint = new JointConstraint(bodies[i], bodies[i - 1], bodies[i - 1]->Position);
+	//		world->AddConstraint(joint);
+	//	}
+	//}
+
+	// Add two bodies
+	//Body* a = new Body(CircleShape(30), Vec2(Graphics::Width() / 2.0, Graphics::Height() / 5.0), 0.0f);
+	//Body* b = new Body(CircleShape(20), Vec2(a->Position.x - 100, a->Position.y), 1.0f);
+	//world->AddBody(a);
+	//world->AddBody(b);
+
+	// Add a joint constraint
+
 }
 
 void Application::Input()
@@ -70,7 +93,7 @@ void Application::Input()
 				//bodies.push_back(new Body(PolygonShape(vertices), Vec2(x, y), 0.01f, 1.f));
 				int x, y;
 				SDL_GetMouseState(&x, &y);
-				Body* body = new Body(BoxShape(100.f, 100.f), Vec2(x, y), 10.f, 0.01f);
+				Body* body = new Body(BoxShape(100.f, 100.f), Vec2(x, y), 10.f, 0.01f, 0.0);
 				body->SetTexture("./assets/crate.png");
 				world->AddBody(body);
 			}
@@ -107,7 +130,7 @@ void Application::Update()
 	timePreviousFrame = SDL_GetTicks();
 
 
-	Vec2 windForce = Vec2(10 * PIXEL_PER_METER, 0);
+	Vec2 windForce = Vec2(10 * PIXELS_PER_METER, 0);
 	Vec2 weight = Vec2(0.f, 1.f);
 
 	world->Update(deltaTime);
@@ -192,7 +215,17 @@ void Application::Render()
 
 	Uint32 color;
 
-	for (auto body : *world->GetBodies())
+	for (Constraint* constraint : world->GetConstraints())
+	{
+		Vec2 aPointInWorldSpace = constraint->a->LocalToWorld(constraint->bPoint);
+		Vec2 bPointInWorldSpace = constraint->b->LocalToWorld(constraint->bPoint);
+
+		Graphics::DrawLine(aPointInWorldSpace.x, aPointInWorldSpace.y, bPointInWorldSpace.x, bPointInWorldSpace.y, 0xFFFFFF00);
+		Graphics::DrawFillRect(aPointInWorldSpace.x, aPointInWorldSpace.y, 10, 10, 0xFF0000FF);
+		Graphics::DrawFillRect(bPointInWorldSpace.x, bPointInWorldSpace.y, 10, 10, 0xFFFF0000);
+	}
+
+	for (auto body : world->GetBodies())
 	{
 		if (isInDebugMode)
 			color = body->isCollided ? 0xFF0000FF : 0xFFFFFFFF;
@@ -203,9 +236,9 @@ void Application::Render()
 		{
 			CircleShape* circleShape = (CircleShape*)body->shape;
 			if (isInDebugMode || !body->texture)
-				Graphics::DrawCircle(body->Position.x, body->Position.y, circleShape->radius, body->rotation, color);
+				Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
 			else
-				Graphics::DrawTexture(body->Position.x, body->Position.y, circleShape->radius * 2, circleShape->radius * 2, body->rotation, body->texture);
+				Graphics::DrawTexture(body->position.x, body->position.y, circleShape->radius * 2, circleShape->radius * 2, body->rotation, body->texture);
 
 		}
 
@@ -213,10 +246,10 @@ void Application::Render()
 		{
 			BoxShape* boxShape = (BoxShape*)body->shape;
 			if (isInDebugMode || !body->texture)
-				Graphics::DrawPolygon(body->Position.x, body->Position.y, boxShape->worldVertices, color);
+				Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, color);
 
 			else
-				Graphics::DrawTexture(body->Position.x, body->Position.y,boxShape->width,boxShape->height, body->rotation, body->texture);
+				Graphics::DrawTexture(body->position.x, body->position.y,boxShape->width,boxShape->height, body->rotation, body->texture);
 
 		}
 
@@ -225,10 +258,10 @@ void Application::Render()
 			PolygonShape* polygonShape = (PolygonShape*)body->shape;
 
 			if (isInDebugMode)
-				Graphics::DrawPolygon(body->Position.x, body->Position.y, polygonShape->worldVertices, color);
+				Graphics::DrawPolygon(body->position.x, body->position.y, polygonShape->worldVertices, color);
 			
 			else
-				Graphics::DrawFillPolygon(body->Position.x, body->Position.y, polygonShape->worldVertices, color);
+				Graphics::DrawFillPolygon(body->position.x, body->position.y, polygonShape->worldVertices, color);
 
 		}
 	}

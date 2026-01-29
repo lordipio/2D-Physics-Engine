@@ -1,232 +1,249 @@
 #include "CollisionDetection.h"
-#include "E:\Projects\PhysicsEngine\PhysicsEngine\src\Graphics.h"
+#include "../Graphics.h"
 #include <limits>
 
-bool CollisionDetection::isColliding(Body* body1, Body* body2, Contact& contact)
-{
-	
-	bool isBody1Circle = body1->shape->GetType() == CIRCLE;
-	bool isBody2Circle = body2->shape->GetType() == CIRCLE;
+bool CollisionDetection::IsColliding(Body* a, Body* b, std::vector<Contact>& contacts) {
+    bool aIsCircle = a->shape->GetType() == CIRCLE;
+    bool bIsCircle = b->shape->GetType() == CIRCLE;
+    bool aIsPolygon = a->shape->GetType() == POLYGON || a->shape->GetType() == BOX;
+    bool bIsPolygon = b->shape->GetType() == POLYGON || b->shape->GetType() == BOX;
 
-	bool isBody1PolygonOrBox = body1->shape->GetType() == BOX || body1->shape->GetType() == POLYGON;
-	bool isBody2PolygonOrBox = body2->shape->GetType() == BOX || body2->shape->GetType() == POLYGON;
-
-
-	if (isBody1Circle && isBody2Circle)
-	{
-		return isCollidingCircleCircle(body1, body2, contact);
-	}
-
-	if (isBody1PolygonOrBox && isBody2PolygonOrBox)
-	{
-		return IsCollidingPolygonPolygon(body1, body2, contact);
-	}
-
-	if (isBody1PolygonOrBox && isBody2Circle)
-	{
-		return IsCollidingPolygonCircle(body1, body2, contact);
-	}
-
-	if (isBody1Circle && isBody2PolygonOrBox)
-	{
-		return IsCollidingPolygonCircle(body2, body1, contact);
-	}
-
-	return false;
+    if (aIsCircle && bIsCircle) {
+        return IsCollidingCircleCircle(a, b, contacts);
+    }
+    if (aIsPolygon && bIsPolygon) {
+        return IsCollidingPolygonPolygon(a, b, contacts);
+    }
+    if (aIsPolygon && bIsCircle) {
+        return IsCollidingPolygonCircle(a, b, contacts);
+    }
+    if (aIsCircle && bIsPolygon) {
+        return IsCollidingPolygonCircle(b, a, contacts);
+    }
+    return false;
 }
 
-bool CollisionDetection::isCollidingCircleCircle(Body* circleBody1, Body* circleBody2, Contact& contact)
-{
-	CircleShape* circleShape1 = (CircleShape*)circleBody1->shape;
-	CircleShape* circleShape2 = (CircleShape*)circleBody2->shape;
+bool CollisionDetection::IsCollidingCircleCircle(Body* a, Body* b, std::vector<Contact>& contacts) {
+    CircleShape* aCircleShape = (CircleShape*)a->shape;
+    CircleShape* bCircleShape = (CircleShape*)b->shape;
 
-	Vec2 circle2To1 = circleBody2->Position - circleBody1->Position;
-	float distanceSquare = circle2To1.MagnitudeSquared();
+    const Vec2 ab = b->position - a->position;
+    const float radiusSum = aCircleShape->radius + bCircleShape->radius;
 
-	float radiusSum = circleShape1->radius + circleShape2->radius;
+    bool isColliding = ab.MagnitudeSquared() <= (radiusSum * radiusSum);
 
-	if (distanceSquare > radiusSum * radiusSum)
-		return false;
+    if (!isColliding) {
+        return false;
+    }
+    Contact contact;
+    contact.a = a;
+    contact.b = b;
 
-	contact.body1 = circleBody1;
-	contact.body2 = circleBody2;
+    contact.normal = ab;
+    contact.normal.Normalize();
 
-	contact.normal = circle2To1.Normalize();
+    contact.start = b->position - contact.normal * bCircleShape->radius;
+    contact.end = a->position + contact.normal * aCircleShape->radius;
 
-	contact.start = circleBody2->Position - contact.normal * circleShape2->radius;
-	contact.end = circleBody1->Position + contact.normal * circleShape1->radius;
+    contact.depth = (contact.end - contact.start).Magnitude();
 
-	contact.depth = (contact.start - contact.end).Magnitude();
+    contacts.push_back(contact);
 
-	return true;
+    return true;
 }
 
-bool CollisionDetection::IsCollidingPolygonPolygon(Body* a, Body* b, Contact& contact)
-{
-	PolygonShape* shapeA = (PolygonShape*)a->shape;
-	PolygonShape* shapeB = (PolygonShape*)b->shape;
+bool CollisionDetection::IsCollidingPolygonPolygon(Body* a, Body* b, std::vector<Contact>& contacts) {
+    PolygonShape* aPolygonShape = (PolygonShape*)a->shape;
+    PolygonShape* bPolygonShape = (PolygonShape*)b->shape;
+    int aIndexReferenceEdge, bIndexReferenceEdge;
+    Vec2 aSupportPoint, bSupportPoint;
+    float abSeparation = aPolygonShape->FindMinSeparation(bPolygonShape, aIndexReferenceEdge, aSupportPoint);
+    if (abSeparation >= 0) {
+        return false;
+    }
+    float baSeparation = bPolygonShape->FindMinSeparation(aPolygonShape, bIndexReferenceEdge, bSupportPoint);
+    if (baSeparation >= 0) {
+        return false;
+    }
 
-	Vec2 pointA;
-	Vec2 axisA;
-	float SepAB;
-	
-	Vec2 pointB;
-	Vec2 axisB;
-	float SepBA;
+    PolygonShape* referenceShape;
+    PolygonShape* incidentShape;
+    int indexReferenceEdge;
+    if (abSeparation > baSeparation) {
+        referenceShape = aPolygonShape;
+        incidentShape = bPolygonShape;
+        indexReferenceEdge = aIndexReferenceEdge;
+    }
+    else {
+        referenceShape = bPolygonShape;
+        incidentShape = aPolygonShape;
+        indexReferenceEdge = bIndexReferenceEdge;
+    }
 
-	SepAB = shapeA->FindMinSeparation(shapeB, axisA, pointA);
-	
-	if (SepAB > 0)
-		return false;
-	
+    // Find the reference edge based on the index that returned from the function
+    Vec2 referenceEdge = referenceShape->EdgeAt(indexReferenceEdge);
 
-	SepBA = shapeB->FindMinSeparation(shapeA, axisB, pointB);
+    ///////////////////////////////////// 
+    // Clipping 
+    /////////////////////////////////////
+    int incidentIndex = incidentShape->FindIncidentEdge(referenceEdge.Normal());
+    int incidentNextIndex = (incidentIndex + 1) % incidentShape->worldVertices.size();
+    Vec2 v0 = incidentShape->worldVertices[incidentIndex];
+    Vec2 v1 = incidentShape->worldVertices[incidentNextIndex];
 
-	if (SepBA > 0)
-		return false;
+    std::vector<Vec2> contactPoints = { v0, v1 };
+    std::vector<Vec2> clippedPoints = contactPoints;
+    for (int i = 0; i < referenceShape->worldVertices.size(); i++) {
+        if (i == indexReferenceEdge)
+            continue;
+        Vec2 c0 = referenceShape->worldVertices[i];
+        Vec2 c1 = referenceShape->worldVertices[(i + 1) % referenceShape->worldVertices.size()];
+        int numClipped = referenceShape->ClipSegmentToLine(contactPoints, clippedPoints, c0, c1);
+        if (numClipped < 2) {
+            break;
+        }
 
+        contactPoints = clippedPoints; // make the next contact points the ones that were just clipped
+    }
 
-	contact.body1 = a;
-	contact.body2 = b;
-	if (SepAB > SepBA)
-	{
-		contact.depth = -SepAB;
-		contact.normal = axisA.Normal();
-		printf("PointA.x: %f		PointB.y: %f\n", pointA.x, pointA.y);
-		contact.start = pointA;
-		contact.end = pointA + contact.normal * contact.depth;
-	}
-	else
-	{
-		contact.depth = -SepBA;
-		contact.normal = -axisB.Normal();
-		printf("PointB.x: %f		PointB.y: %f\n", pointB.x, pointB.y);
-		contact.end = pointB;
-		contact.start = pointB - contact.normal * contact.depth;
-	}
+    auto vref = referenceShape->worldVertices[indexReferenceEdge];
 
-	return true;
+    // Loop all clipped points, but only consider those where separation is negative (objects are penetrating each other)
+    for (auto& vclip : clippedPoints) {
+        float separation = (vclip - vref).Dot(referenceEdge.Normal());
+        if (separation <= 0) {
+            Contact contact;
+            contact.a = a;
+            contact.b = b;
+            contact.normal = referenceEdge.Normal();
+            contact.start = vclip;
+            contact.end = vclip + contact.normal * -separation;
+            if (baSeparation >= abSeparation) {
+                std::swap(contact.start, contact.end); // the start-end points are always from "a" to "b"
+                contact.normal *= -1.0;                // the collision normal is always from "a" to "b"
+            }
 
+            contacts.push_back(contact);
+        }
+    }
+    return true;
 }
 
-bool CollisionDetection::IsCollidingPolygonCircle(Body* polygonBody, Body* circleBody, Contact& contact)
-{
-	PolygonShape* polygonShape = (PolygonShape*)polygonBody->shape;
-	CircleShape* circleShape = (CircleShape*)circleBody->shape;
-	std::vector<Vec2> vertices = polygonShape->worldVertices;
+bool CollisionDetection::IsCollidingPolygonCircle(Body* polygon, Body* circle, std::vector<Contact>& contacts) {
+    const PolygonShape* polygonShape = (PolygonShape*)polygon->shape;
+    const CircleShape* circleShape = (CircleShape*)circle->shape;
+    const std::vector<Vec2>& polygonVertices = polygonShape->worldVertices;
 
-	Vec2 currentVertex;
-	Vec2 nextVertex;
-	Vec2 currentNormal;
-	Vec2 currentEdge;
+    bool isOutside = false;
+    Vec2 minCurrVertex;
+    Vec2 minNextVertex;
+    float distanceCircleEdge = std::numeric_limits<float>::lowest();
 
-	Vec2 minMainVertex;
-	Vec2 minNextVertex;
-	Vec2 nearestEdgeNormal;
-	Vec2 nearestEdge;
+    // Loop all the edges of the polygon/box finding the nearest edge to the circle center
+    for (int i = 0; i < polygonVertices.size(); i++) {
+        int currVertex = i;
+        int nextVertex = (i + 1) % polygonVertices.size();
+        Vec2 edge = polygonShape->EdgeAt(currVertex);
+        Vec2 normal = edge.Normal();
 
+        // Compare the circle center with the rectangle vertex
+        Vec2 vertexToCircleCenter = circle->position - polygonVertices[currVertex];
+        float projection = vertexToCircleCenter.Dot(normal);
 
-	bool isOutside = false;
-	float smallestDistanceBetweenCircleCenterAndEdge;
-	float distanceBetweenCircleCenterAndEdge;
+        // If we found a dot product projection that is in the positive/outside side of the normal
+        if (projection > 0) {
+            // Circle center is outside the polygon
+            distanceCircleEdge = projection;
+            minCurrVertex = polygonVertices[currVertex];
+            minNextVertex = polygonVertices[nextVertex];
+            isOutside = true;
+            break;
+        }
+        else {
+            // Circle center is inside the rectangle, find the min edge (the one with the least negative projection)
+            if (projection > distanceCircleEdge) {
+                distanceCircleEdge = projection;
+                minCurrVertex = polygonVertices[currVertex];
+                minNextVertex = polygonVertices[nextVertex];
+            }
+        }
+    }
 
-	int verticesNumber = vertices.size();
-	for (int i = 0; i < verticesNumber; i++)
-	{
-		currentVertex = vertices[i];
-		nextVertex = vertices[ (i + 1) % verticesNumber];
-		currentEdge = nextVertex - currentVertex;
-		currentNormal = currentEdge.Normal();
-		distanceBetweenCircleCenterAndEdge = (circleBody->Position - currentVertex).Dot(currentNormal);
+    Contact contact;
 
-		if (i == 0)
-			smallestDistanceBetweenCircleCenterAndEdge = distanceBetweenCircleCenterAndEdge;
+    if (isOutside) {
+        ///////////////////////////////////////
+        // Check if we are inside region A:
+        ///////////////////////////////////////
+        Vec2 v1 = circle->position - minCurrVertex; // vector from the nearest vertex to the circle center
+        Vec2 v2 = minNextVertex - minCurrVertex; // the nearest edge (from curr vertex to next vertex)
+        if (v1.Dot(v2) < 0) {
+            // Distance from vertex to circle center is greater than radius... no collision
+            if (v1.Magnitude() > circleShape->radius) {
+                return false;
+            }
+            else {
+                // Detected collision in region A:
+                contact.a = polygon;
+                contact.b = circle;
+                contact.depth = circleShape->radius - v1.Magnitude();
+                contact.normal = v1.Normalize();
+                contact.start = circle->position + (contact.normal * -circleShape->radius);
+                contact.end = contact.start + (contact.normal * contact.depth);
+            }
+        }
+        else {
+            ///////////////////////////////////////
+            // Check if we are inside region B:
+            ///////////////////////////////////////
+            v1 = circle->position - minNextVertex; // vector from the next nearest vertex to the circle center
+            v2 = minCurrVertex - minNextVertex;   // the nearest edge
+            if (v1.Dot(v2) < 0) {
+                // Distance from vertex to circle center is greater than radius... no collision
+                if (v1.Magnitude() > circleShape->radius) {
+                    return false;
+                }
+                else {
+                    // Detected collision in region B:
+                    contact.a = polygon;
+                    contact.b = circle;
+                    contact.depth = circleShape->radius - v1.Magnitude();
+                    contact.normal = v1.Normalize();
+                    contact.start = circle->position + (contact.normal * -circleShape->radius);
+                    contact.end = contact.start + (contact.normal * contact.depth);
+                }
+            }
+            else {
+                ///////////////////////////////////////
+                // We are inside region C:
+                ///////////////////////////////////////
+                if (distanceCircleEdge > circleShape->radius) {
+                    // No collision... Distance between the closest distance and the circle center is greater than the radius.
+                    return false;
+                }
+                else {
+                    // Detected collision in region C:
+                    contact.a = polygon;
+                    contact.b = circle;
+                    contact.depth = circleShape->radius - distanceCircleEdge;
+                    contact.normal = (minNextVertex - minCurrVertex).Normal();
+                    contact.start = circle->position - (contact.normal * circleShape->radius);
+                    contact.end = contact.start + (contact.normal * contact.depth);
+                }
+            }
+        }
+    }
+    else {
+        // The center of circle is inside the polygon... it is definitely colliding!
+        contact.a = polygon;
+        contact.b = circle;
+        contact.depth = circleShape->radius - distanceCircleEdge;
+        contact.normal = (minNextVertex - minCurrVertex).Normal();
+        contact.start = circle->position - (contact.normal * circleShape->radius);
+        contact.end = contact.start + (contact.normal * contact.depth);
+    }
 
-		if (distanceBetweenCircleCenterAndEdge > 0)
-		{
-			smallestDistanceBetweenCircleCenterAndEdge = distanceBetweenCircleCenterAndEdge;
-			minMainVertex = currentVertex;
-			minNextVertex = nextVertex;
-			nearestEdgeNormal = currentNormal;
-			nearestEdge = currentEdge;
-			isOutside = true;
-			break;
-		}
-		// circle is inside of the polygon
-		else if (smallestDistanceBetweenCircleCenterAndEdge <= distanceBetweenCircleCenterAndEdge)
-		{
-			smallestDistanceBetweenCircleCenterAndEdge = distanceBetweenCircleCenterAndEdge;
-			minMainVertex = currentVertex;
-			minNextVertex = nextVertex;
-			nearestEdgeNormal = currentNormal;
-			nearestEdge = currentEdge;
-		}
-	}
+    contacts.push_back(contact);
 
-	if (isOutside)
-	{
-		Vec2 centerToMainVertex = circleBody->Position - minMainVertex;
-		Vec2 centerToNextVertex = circleBody->Position - minNextVertex;
-
-		if (currentEdge.Dot(centerToMainVertex) < 0) // A
-		{
-			if (centerToMainVertex.MagnitudeSquared() <= circleShape->radius * circleShape->radius)
-			{
-				contact.body1 = polygonBody;
-				contact.body2 = circleBody;
-				contact.normal = centerToMainVertex.Normalize();
-				contact.start = circleBody->Position - contact.normal * circleShape->radius;
-				contact.end = minMainVertex;
-				contact.depth = (contact.start - contact.end).Magnitude();
-			}
-
-			else
-				return false;
-		}
-
-		
-		else if (currentEdge.Dot(centerToNextVertex) > 0) // B
-			{
-				if (centerToNextVertex.MagnitudeSquared() <= circleShape->radius * circleShape->radius)
-				{
-					contact.body1 = polygonBody;
-					contact.body2 = circleBody;
-					contact.normal = centerToNextVertex.Normalize();
-					contact.start = circleBody->Position - contact.normal * circleShape->radius;
-					contact.end = minNextVertex;
-					contact.depth = (contact.start - contact.end).Magnitude();
-				}
-				else
-					return false;
-			}
-		
-
-		else // C
-		{
-			float circleCenterToEdgeDist = nearestEdgeNormal.Dot(centerToMainVertex);
-			if (circleCenterToEdgeDist < circleShape->radius)
-			{
-				contact.body1 = polygonBody;
-				contact.body2 = circleBody;
-				contact.normal = nearestEdgeNormal;
-				contact.start = circleBody->Position - contact.normal * circleShape->radius;
-				contact.end = circleBody->Position - contact.normal * circleCenterToEdgeDist;
-				contact.depth = (contact.start - contact.end).Magnitude();
-			}
-			else
-				return false;
-		}
-	}
-	else // inside
-	{
-		float circleCenterToEdgeDist = nearestEdgeNormal.Dot(circleBody->Position - minMainVertex);
-		contact.body1 = polygonBody;
-		contact.body2 = circleBody;
-		contact.normal = nearestEdgeNormal;
-		contact.start = circleBody->Position - contact.normal * circleShape->radius;
-		contact.end = circleBody->Position - contact.normal * circleCenterToEdgeDist;
-		contact.depth = (contact.start - contact.end).Magnitude();
-	}
-
-	return true;
+    return true;
 }

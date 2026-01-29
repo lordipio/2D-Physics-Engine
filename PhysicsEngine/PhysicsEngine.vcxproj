@@ -167,11 +167,14 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\physics\CollisionDetection.cpp" />
     <ClCompile Include="src\physics\Constants.cpp" />
+    <ClCompile Include="src\physics\Constraint.cpp" />
     <ClCompile Include="src\physics\Contact.cpp" />
     <ClCompile Include="src\physics\Force.cpp" />
     <ClCompile Include="src\physics\Body.cpp" />
+    <ClCompile Include="src\physics\MatMN.cpp" />
     <ClCompile Include="src\physics\Shape.cpp" />
     <ClCompile Include="src\physics\Vec2.cpp" />
+    <ClCompile Include="src\physics\VecN.cpp" />
     <ClCompile Include="src\physics\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -183,11 +186,14 @@
     <ClInclude Include="src\Graphics.h" />
     <ClInclude Include="src\physics\CollisionDetection.h" />
     <ClInclude Include="src\physics\Constants.h" />
+    <ClInclude Include="src\physics\Constraint.h" />
     <ClInclude Include="src\physics\Contact.h" />
     <ClInclude Include="src\physics\Force.h" />
     <ClInclude Include="src\physics\Body.h" />
+    <ClInclude Include="src\physics\MatMN.h" />
     <ClInclude Include="src\physics\Shape.h" />
     <ClInclude Include="src\physics\Vec2.h" />
+    <ClInclude Include="src\physics\VecN.h" />
     <ClInclude Include="src\physics\World.h" />
   </ItemGroup>
   <ItemGroup>

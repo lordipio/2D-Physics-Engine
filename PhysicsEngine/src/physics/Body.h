@@ -13,9 +13,9 @@ struct Body
 
 	bool isCollided = false;
 
-	Vec2 Position;
-	Vec2 Acceleration;
-	Vec2 Velocity;
+	Vec2 position;
+	Vec2 acceleration;
+	Vec2 velocity;
 
 	float rotation;
 	float angularVelocity;
@@ -26,7 +26,7 @@ struct Body
 
 	Shape* shape;
 
-	float Mass;
+	float mass;
 	float InverseMass;
 	
 	float I;
@@ -49,14 +49,18 @@ struct Body
 	void ClearLinearForce();
 	void ClearAngularForce();
 
-	void Update(float deltaTime);
+	void ApplyImpulseLinear(const Vec2& J);
+	void ApplyImpulseAngular(const float J);
+	void ApplyImpulseAtPoint(const Vec2& J, const Vec2& r);
 
-	void ApplyImpulse(const Vec2& J);
-	void ApplyImpulse(const Vec2& J, const Vec2& r);
-
+	void IntegrateForces(float dt);
+	void IntegrateVelocities(float dt);
 
 	bool IsStatic() const;
 
+	Vec2 LocalToWorld(const Vec2& point) const;
+
+	Vec2 WorldToLocal(const Vec2& point) const;
 };
 
 #endif // !BODY_H
