@@ -44,6 +44,26 @@ void World::AddTorque(float torque) {
 }
 
 void World::Update(float dt) {
+
+
+        if (pendingClear)
+        {
+            // Delete bodies
+            for (Body* body : bodies)
+                delete body;
+            bodies.clear();
+
+            // Delete constraints
+            for (Constraint* constraint : constraints)
+                delete constraint;
+            constraints.clear();
+
+            forces.clear();
+            torques.clear();
+
+            pendingClear = false;
+            return;
+        }
     // Create a vector of penetration constraints that will be solved frame per frame
     std::vector<PenetrationConstraint> penetrations;
 
@@ -116,4 +136,25 @@ void World::Update(float dt) {
     for (auto& body : bodies) {
         body->IntegrateVelocities(dt);
     }
+}
+
+void World::ClearBodies()
+{
+    // Delete all bodies
+    for (Body* body : bodies) {
+        delete body;
+    }
+    bodies.clear();
+
+    // Delete all constraints (they reference bodies!)
+    for (Constraint* constraint : constraints) {
+        delete constraint;
+    }
+    constraints.clear();
+
+    // Clear global forces / torques
+    forces.clear();
+    torques.clear();
+
+    pendingClear = true;
 }

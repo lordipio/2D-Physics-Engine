@@ -46,6 +46,37 @@ public:
 	void Input();
 	void Render();
 	void Destroy();
+
+	SDL_Texture* BallTex;
+	SDL_Texture* CrateTex;
+	SDL_Texture* BowlingTex;
+
+	enum class SpawnTool {
+		None,
+		Box,
+		Ball,
+		BowlingBall
+	};
+
+	SpawnTool currentTool = SpawnTool::None;
+
+
+	const char* SpawnToolToString(SpawnTool tool)
+	{
+		switch (tool)
+		{
+		case SpawnTool::None:        return "None";
+		case SpawnTool::Box:         return "Box";
+		case SpawnTool::Ball:        return "Ball";
+		case SpawnTool::BowlingBall: return "Bowling Ball";
+		default:                     return "Unknown";
+		}
+	}
+
+	bool ImageButtonWithOutline(const char* name, ImTextureID tex, bool selected, ImVec2 size);
+
+	void CreateBodyBaseOnSpawnTool(SpawnTool tool, Vec2 pos);
+
 };
 
 #endif // !APPLICATION_H

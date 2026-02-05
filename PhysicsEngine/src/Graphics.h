@@ -33,6 +33,8 @@ struct Graphics {
     static void ImGuiShutdown();
     static void ImGuiNewFrame(SDL_Window* window);
     static void ImGuiRender();
+
+    static SDL_Texture* GetTexture(const char* path);
 };
 
 #endif

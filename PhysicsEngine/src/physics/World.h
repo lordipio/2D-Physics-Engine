@@ -14,9 +14,11 @@ private:
 	std::vector<Vec2> forces;
 	std::vector<float> torques;
 
+	bool pendingClear = false;
 public:
 	float gravity;
 
+	void ClearBodies();
 	World(float gravity = -9.8);
 	~World();
 

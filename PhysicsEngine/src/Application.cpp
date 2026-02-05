@@ -12,6 +12,9 @@ void Application::Setup()
 	isRunning = Graphics::OpenWindow();
 	world = new World();
 
+	CrateTex = Graphics::GetTexture("./assets/crate.png");
+	BallTex = Graphics::GetTexture("./assets/basketball.png");
+	BowlingTex = Graphics::GetTexture("./assets/bowlingball.png");
 
 	Body* floor = new Body(BoxShape(Graphics::Width() - 100, 100.f), Vec2(Graphics::Width()/2, Graphics::Height() - 100), 0, 1.f, 0.f);
 	Body* boxB = new Body(BoxShape(200.f, 200.f), Vec2(Graphics::Width() / 2, Graphics::Height()/2), 0);
@@ -51,18 +54,15 @@ void Application::Input()
 				{
 					int x, y;
 					SDL_GetMouseState(&x, &y);
-					Body* body = new Body(CircleShape(50.f), Vec2(x, y), 1.f, 0.7f);
-					body->SetTexture("./assets/basketball.png");
-					world->AddBody(body);
+
 				}
 
 				if (event.button.button == SDL_BUTTON_LEFT)
 				{
 					int x, y;
 					SDL_GetMouseState(&x, &y);
-					Body* body = new Body(CircleShape(50.f), Vec2(x, y), 6.f, 0.1f);
-					body->SetTexture("./assets/bowlingball.png");
-					world->AddBody(body);
+					CreateBodyBaseOnSpawnTool(currentTool, Vec2(x, y));
+
 				}
 
 
@@ -70,9 +70,7 @@ void Application::Input()
 				{
 					int x, y;
 					SDL_GetMouseState(&x, &y);
-					Body* body = new Body(BoxShape(100.f, 100.f), Vec2(x, y), 10.f, 0.f, 1.0);
-					body->SetTexture("./assets/crate.png");
-					world->AddBody(body);
+
 				}
 			}
 
@@ -192,15 +190,115 @@ void Application::HandleUI()
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Clear Bodies")) {
-		// world->ClearBodies(); // implement a method to remove dynamic bodies if not present yet
+		world->ClearBodies(); // implement a method to remove dynamic bodies if not present yet
 	}
 
 	ImGui::Separator();
 	ImGui::Checkbox("Show debug mode", &isInDebugMode);
 	ImGui::Checkbox("Show ImGui Demo", &uiShowDemoWindow);
+
 	ImGui::End();
 
 	if (uiShowDemoWindow) {
 		ImGui::ShowDemoWindow(&uiShowDemoWindow);
+	}
+
+
+
+	ImGui::Begin("Spawn Tools", nullptr,
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoCollapse |
+		ImGuiWindowFlags_AlwaysAutoResize
+	);
+
+	ImGui::Text("Click to select:");
+
+	//if (ImGui::ImageButton("Crate", (ImTextureID)CrateTex, ImVec2(48, 48))) {
+	//	currentTool = SpawnTool::Box;
+	//}
+	if (ImageButtonWithOutline("Crate", (ImTextureID)CrateTex, currentTool == SpawnTool::Box, ImVec2(48, 48)))
+		currentTool = SpawnTool::Box;
+	ImGui::SameLine();
+	if (ImageButtonWithOutline("Ball", (ImTextureID)BallTex, currentTool == SpawnTool::Ball, ImVec2(48, 48)))
+		currentTool = SpawnTool::Ball;
+	//if (ImGui::ImageButton("Ball", (ImTextureID)BallTex, ImVec2(48, 48))) {
+	//	currentTool = SpawnTool::Ball;
+	//}
+	ImGui::SameLine();
+	if (ImageButtonWithOutline("Bowling", (ImTextureID)BowlingTex, currentTool == SpawnTool::BowlingBall, ImVec2(48, 48)))
+		currentTool = SpawnTool::BowlingBall;
+	//if (ImGui::ImageButton("Bowling", (ImTextureID)BowlingTex, ImVec2(48, 48))) {
+	//	currentTool = SpawnTool::BowlingBall;
+	//}
+
+
+
+	ImGui::Separator();
+	ImGui::Text("Current tool: %s", SpawnToolToString(currentTool));
+
+	ImGui::End();
+}
+
+
+bool Application::ImageButtonWithOutline(
+	const char* name,
+	ImTextureID tex,
+	bool selected,
+	ImVec2 size
+) {
+	// Force hover style when selected
+	if (selected) {
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImGui::PushStyleColor(ImGuiCol_Button, style.Colors[ImGuiCol_ButtonHovered]);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, style.Colors[ImGuiCol_ButtonHovered]);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, style.Colors[ImGuiCol_ButtonHovered]);
+	}
+
+	bool clicked = ImGui::ImageButton(name, tex, size);
+
+	// Draw selection border AFTER the button exists
+	if (selected) {
+		ImDrawList* draw = ImGui::GetWindowDrawList();
+		draw->AddRect(
+			ImGui::GetItemRectMin(),
+			ImGui::GetItemRectMax(),
+			IM_COL32(255, 160, 255, 200),
+			1.0f,
+			0,
+			5.0f
+		);
+	}
+
+	if (selected) {
+		ImGui::PopStyleColor(3);
+	}
+
+	return clicked;
+}
+
+void Application::CreateBodyBaseOnSpawnTool(SpawnTool tool, Vec2 pos)
+{
+	Body* body;
+	switch (tool)
+	{
+		case SpawnTool::BowlingBall:
+			body = new Body(CircleShape(50.f), pos, 6.f, 0.1f);
+			body->SetTexture("./assets/bowlingball.png");
+			world->AddBody(body);
+			break;
+
+		case SpawnTool::Ball:
+			body = new Body(CircleShape(50.f), pos, 1.f, 0.7f);
+			body->SetTexture("./assets/basketball.png");
+			world->AddBody(body);
+			break;
+
+		case SpawnTool::Box:
+			body = new Body(BoxShape(100.f, 100.f), pos, 10.f, 0.f, 1.0);
+			body->SetTexture("./assets/crate.png");
+			world->AddBody(body);
+			break;
+
+
 	}
 }

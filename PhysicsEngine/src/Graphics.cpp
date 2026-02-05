@@ -1,5 +1,7 @@
 #include "Graphics.h"
 #include <iostream>
+#include <SDL_image.h>
+
 
 SDL_Window* Graphics::window = NULL;
 SDL_Renderer* Graphics::renderer = NULL;
@@ -137,27 +139,7 @@ void Graphics::ImGuiNewFrame(SDL_Window* window)
 
 void Graphics::ImGuiRender()
 {
-    //// === ImGui UI ===
-    //ImGui::Begin("Simulation Controls");
-    //ImGui::Text("Physics");
-    //// slider controls gravity (in m/s^2)
-    //ImGui::SliderFloat("Gravity (m/s^2)", &uiGravity, -50.0f, 50.0f);
-    //if (ImGui::Button(uiPaused ? "Resume" : "Pause")) {
-    //    uiPaused = !uiPaused;
-    //}
-    //ImGui::SameLine();
-    //if (ImGui::Button("Clear Bodies")) {
-    //    // world->ClearBodies(); // implement a method to remove dynamic bodies if not present yet
-    //}
 
-    //ImGui::Separator();
-    //ImGui::Checkbox("Show debug mode", &isInDebugMode);
-    //ImGui::Checkbox("Show ImGui Demo", &uiShowDemoWindow);
-    //ImGui::End();
-
-    //if (uiShowDemoWindow) {
-    //    ImGui::ShowDemoWindow(&uiShowDemoWindow);
-    //}
 }
 
 void Graphics::CloseWindow(void) {
@@ -167,4 +149,17 @@ void Graphics::CloseWindow(void) {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+}
+
+
+SDL_Texture* Graphics::GetTexture(const char* texturePath)
+{
+    SDL_Texture* texture = nullptr;
+    if (SDL_Surface* surface = IMG_Load(texturePath))
+    {
+        texture = SDL_CreateTextureFromSurface(Graphics::renderer, surface);
+        SDL_FreeSurface(surface);
+    }
+    
+    return texture;
 }
