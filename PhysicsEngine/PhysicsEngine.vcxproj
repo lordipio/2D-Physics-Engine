@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\Projects\PhysicsEngine\SDL2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\Projects\PhysicsEngine\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2_image\include;D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2_image\lib\x86;D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>E:\Projects\PhysicsEngine\SDL2\include;$(IncludePath)</IncludePath>
@@ -83,8 +83,8 @@
     <LibraryPath>E:\Projects\PhysicsEngine\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>E:\Projects\PhysicsEngine\SDL2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\Projects\PhysicsEngine\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -92,14 +92,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\PhysicsEngine\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\ImGUI;D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2_image\include;D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2test.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>E:\Projects\PhysicsEngine\SDL2\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2_image\lib\x86;D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,7 +146,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\PhysicsEngine\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -155,10 +155,17 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2test.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>E:\Projects\PhysicsEngine\SDL2\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\SDL2\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ImGUI\imgui.cpp" />
+    <ClCompile Include="ImGUI\imgui_demo.cpp" />
+    <ClCompile Include="ImGUI\imgui_draw.cpp" />
+    <ClCompile Include="ImGUI\imgui_impl_sdl2.cpp" />
+    <ClCompile Include="ImGUI\imgui_impl_sdlrenderer2.cpp" />
+    <ClCompile Include="ImGUI\imgui_tables.cpp" />
+    <ClCompile Include="ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="lib\SDL2_gfx\SDL2_gfxPrimitives.c" />
     <ClCompile Include="lib\SDL2_gfx\SDL2_imageFilter.c" />
     <ClCompile Include="lib\SDL2_gfx\SDL2_rotozoom.c" />
@@ -178,6 +185,14 @@
     <ClCompile Include="src\physics\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ImGUI\imconfig.h" />
+    <ClInclude Include="ImGUI\imgui.h" />
+    <ClInclude Include="ImGUI\imgui_impl_sdl2.h" />
+    <ClInclude Include="ImGUI\imgui_impl_sdlrenderer2.h" />
+    <ClInclude Include="ImGUI\imgui_internal.h" />
+    <ClInclude Include="ImGUI\imstb_rectpack.h" />
+    <ClInclude Include="ImGUI\imstb_textedit.h" />
+    <ClInclude Include="ImGUI\imstb_truetype.h" />
     <ClInclude Include="lib\SDL2_gfx\SDL2_gfxPrimitives.h" />
     <ClInclude Include="lib\SDL2_gfx\SDL2_gfxPrimitives_font.h" />
     <ClInclude Include="lib\SDL2_gfx\SDL2_imageFilter.h" />

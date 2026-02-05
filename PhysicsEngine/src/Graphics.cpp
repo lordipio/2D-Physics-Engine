@@ -33,15 +33,29 @@ bool Graphics::OpenWindow() {
         std::cerr << "Error creating SDL renderer" << std::endl;
         return false;
     }
+
+    ImGuiInit(window, renderer);
+
     return true;
 }
 
 void Graphics::ClearScreen(Uint32 color) {
-    SDL_SetRenderDrawColor(renderer, color >> 16, color >> 8, color, 255);
+    // extract RGBA from 0xAARRGGBB style input
+    // note: your old code passed color >> bits but didn't mask alpha; simpler:
+    Uint8 r = (color >> 16) & 0xFF;
+    Uint8 g = (color >> 8) & 0xFF;
+    Uint8 b = (color) & 0xFF;
+    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
     SDL_RenderClear(renderer);
 }
 
 void Graphics::RenderFrame() {
+
+    // Render ImGui draw data (if any)
+    ImGui::Render();
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
+
+
     SDL_RenderPresent(renderer);
 }
 
@@ -97,7 +111,59 @@ void Graphics::DrawTexture(int x, int y, int width, int height, float rotation, 
     SDL_RenderCopyEx(renderer, texture, NULL, &dstRect, rotationDeg, NULL, SDL_FLIP_NONE);
 }
 
+void Graphics::ImGuiInit(SDL_Window* window, SDL_Renderer* renderer)
+{
+    // ImGui initialization
+    ImGui::CreateContext();
+    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+    ImGui_ImplSDLRenderer2_Init(renderer);
+    ImGui::StyleColorsDark();
+}
+
+void Graphics::ImGuiShutdown()
+{
+    // Shutdown ImGui properly
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void Graphics::ImGuiNewFrame(SDL_Window* window)
+{
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+}
+
+void Graphics::ImGuiRender()
+{
+    //// === ImGui UI ===
+    //ImGui::Begin("Simulation Controls");
+    //ImGui::Text("Physics");
+    //// slider controls gravity (in m/s^2)
+    //ImGui::SliderFloat("Gravity (m/s^2)", &uiGravity, -50.0f, 50.0f);
+    //if (ImGui::Button(uiPaused ? "Resume" : "Pause")) {
+    //    uiPaused = !uiPaused;
+    //}
+    //ImGui::SameLine();
+    //if (ImGui::Button("Clear Bodies")) {
+    //    // world->ClearBodies(); // implement a method to remove dynamic bodies if not present yet
+    //}
+
+    //ImGui::Separator();
+    //ImGui::Checkbox("Show debug mode", &isInDebugMode);
+    //ImGui::Checkbox("Show ImGui Demo", &uiShowDemoWindow);
+    //ImGui::End();
+
+    //if (uiShowDemoWindow) {
+    //    ImGui::ShowDemoWindow(&uiShowDemoWindow);
+    //}
+}
+
 void Graphics::CloseWindow(void) {
+
+    ImGuiShutdown();
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

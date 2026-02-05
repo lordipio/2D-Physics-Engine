@@ -27,11 +27,15 @@ private:
 
 	Vec2 anchor;
 	const float K = 300.f;
-	const float g = 9.8f;
+	float g = 9.8f;
 	const float restLength = 10.f;
 	const int numberOfBodys = 1;
 	const float mass = 2;
-
+	void HandleUI();
+	// Application.h (add members)
+	// float uiGravity = 9.8f;   // meters / s^2
+	bool uiPaused = false;
+	bool uiShowDemoWindow = false;
 public:
 	Application() = default;
 	~Application() = default;

@@ -96,7 +96,7 @@ void World::Update(float dt) {
     for (auto& constraint: penetrations) {
         constraint.PreSolve(dt);
     }
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 10; i++) {
         for (auto& constraint: constraints) {
             constraint->Solve();
         }

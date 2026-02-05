@@ -9,13 +9,14 @@
 class World
 {
 private:
-	float gravity;
 	std::vector<Body*> bodies;
 	std::vector<Constraint*> constraints;
 	std::vector<Vec2> forces;
 	std::vector<float> torques;
 
 public:
+	float gravity;
+
 	World(float gravity = -9.8);
 	~World();
 

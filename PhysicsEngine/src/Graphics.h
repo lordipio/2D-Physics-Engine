@@ -5,6 +5,9 @@
 #include "../lib//SDL2_gfx/SDL2_gfxPrimitives.h"
 #include "Physics/Vec2.h"
 #include <vector>
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
 
 struct Graphics {
     static int windowWidth;
@@ -26,6 +29,10 @@ struct Graphics {
     static void DrawPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color);
     static void DrawFillPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color);
     static void DrawTexture(int x, int y, int width, int height, float rotation, SDL_Texture* texture);
+    static void ImGuiInit(SDL_Window* window, SDL_Renderer* renderer);
+    static void ImGuiShutdown();
+    static void ImGuiNewFrame(SDL_Window* window);
+    static void ImGuiRender();
 };
 
 #endif
