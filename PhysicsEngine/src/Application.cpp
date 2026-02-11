@@ -1,10 +1,12 @@
 #include "Application.h"
 #include "physics/Contact.h"
+#include <SDL_image.h>
 
 
 bool Application::IsRunning()
 {
 	return isRunning;
+	SDL_Texture* t;
 }
 
 void Application::Setup()
@@ -12,17 +14,13 @@ void Application::Setup()
 	isRunning = Graphics::OpenWindow();
 	world = new World();
 
-	CrateTex = Graphics::GetTexture("./assets/crate.png");
-	BallTex = Graphics::GetTexture("./assets/basketball.png");
-	BowlingTex = Graphics::GetTexture("./assets/bowlingball.png");
+	crateTex = Graphics::GetTexture("./assets/crate.png");
+	ballTex = Graphics::GetTexture("./assets/basketball.png");
+	bowlingTex = Graphics::GetTexture("./assets/bowlingball.png");
+	jointTex = Graphics::GetTexture("./assets/joint.png");
 
-	Body* floor = new Body(BoxShape(Graphics::Width() - 100, 100.f), Vec2(Graphics::Width()/2, Graphics::Height() - 100), 0, 1.f, 0.f);
-	Body* boxB = new Body(BoxShape(200.f, 200.f), Vec2(Graphics::Width() / 2, Graphics::Height()/2), 0);
-	boxB->SetTexture("./assets/crate.png");
-	
-	
+	Body* floor = new Body(BoxShape(Graphics::Width() - 100, 100.f), Vec2(Graphics::Width()/2, Graphics::Height() - 100), 0, 0.1f, 1.f);
 	world->AddBody(floor);
-	world->AddBody(boxB);
 }
 
 void Application::Input()
@@ -47,6 +45,13 @@ void Application::Input()
 
 			break;
 
+		case SDL_MOUSEMOTION:
+			mousePreviousPos = mousePos;
+			mousePos = Vec2(event.motion.x, event.motion.y);
+			mouseVel = mouseVel * mouseVelSmoothing;
+			mouseVel = mouseVel + mousePos - mousePreviousPos;
+			break;
+
 		case SDL_MOUSEBUTTONDOWN:
 			if (!ImGui::GetIO().WantCaptureMouse)
 			{
@@ -54,14 +59,16 @@ void Application::Input()
 				{
 					int x, y;
 					SDL_GetMouseState(&x, &y);
+					mouseState = MouseState::Hold_Left;
 
+					grabbedBody = GetBodyAtPosition(Vec2(x, y));
 				}
 
 				if (event.button.button == SDL_BUTTON_LEFT)
 				{
 					int x, y;
 					SDL_GetMouseState(&x, &y);
-					CreateBodyBaseOnSpawnTool(currentTool, Vec2(x, y));
+					HandleSpawnTool(currentTool, Vec2(x, y));
 
 				}
 
@@ -74,6 +81,25 @@ void Application::Input()
 				}
 			}
 
+			break;
+
+		case SDL_MOUSEBUTTONUP:
+			if (event.button.button == SDL_BUTTON_RIGHT)
+			{
+				mouseState = MouseState::None;
+				
+				if (grabbedBody)
+				{
+					grabbedBody->SetToMovable();	
+
+					if (!uiPaused)
+					{
+						grabbedBody->ApplyImpulseLinear(mouseVel * 4.f * grabbedBody->mass);
+					}
+					
+					grabbedBody = nullptr;
+				}
+			}
 			break;
 		}
 	}
@@ -94,15 +120,16 @@ void Application::Update()
 
 	timePreviousFrame = SDL_GetTicks();
 
-	// Apply UI-controlled gravity (convert meters/s^2 to pixels/s^2 if you use PIXELS_PER_METER)
-	if (!uiPaused) {
-		world->gravity = g;
+	if (grabbedBody)
+	{
+		grabbedBody->SetToStatic();
+		grabbedBody->position = mousePos;
 	}
-	else {
-		world->gravity = 0.f;
-	}
+		
+	if (!uiPaused)
+		world->Update(deltaTime);
 
-	world->Update(deltaTime);
+
 }
 
 
@@ -115,12 +142,11 @@ void Application::Render()
 
 	for (Constraint* constraint : world->GetConstraints())
 	{
-		Vec2 aPointInWorldSpace = constraint->a->LocalToWorld(constraint->bPoint);
-		Vec2 bPointInWorldSpace = constraint->b->LocalToWorld(constraint->bPoint);
+		Vec2 aPos = constraint->a->position;
+		Vec2 bPos = constraint->b->position;
 
-		Graphics::DrawLine(aPointInWorldSpace.x, aPointInWorldSpace.y, bPointInWorldSpace.x, bPointInWorldSpace.y, 0xFFFFFF00);
-		Graphics::DrawFillRect(aPointInWorldSpace.x, aPointInWorldSpace.y, 10, 10, 0xFF0000FF);
-		Graphics::DrawFillRect(bPointInWorldSpace.x, bPointInWorldSpace.y, 10, 10, 0xFFFF0000);
+		Graphics::DrawLine(aPos.x, aPos.y, bPos.x, bPos.y, 0xFF000000);
+
 	}
 
 	for (auto body : world->GetBodies())
@@ -133,7 +159,7 @@ void Application::Render()
 		if (body->shape->GetType() == CIRCLE)
 		{
 			CircleShape* circleShape = (CircleShape*)body->shape;
-			if (isInDebugMode || !body->texture)
+			if (isInDebugMode || !body->texture) 
 				Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
 			else
 				Graphics::DrawTexture(body->position.x, body->position.y, circleShape->radius * 2, circleShape->radius * 2, body->rotation, body->texture);
@@ -195,7 +221,7 @@ void Application::HandleUI()
 
 	ImGui::Separator();
 	ImGui::Checkbox("Show debug mode", &isInDebugMode);
-	ImGui::Checkbox("Show ImGui Demo", &uiShowDemoWindow);
+	ImGui::Checkbox("Is Object Static?", &uiStatic);
 
 	ImGui::End();
 
@@ -213,28 +239,31 @@ void Application::HandleUI()
 
 	ImGui::Text("Click to select:");
 
-	//if (ImGui::ImageButton("Crate", (ImTextureID)CrateTex, ImVec2(48, 48))) {
-	//	currentTool = SpawnTool::Box;
-	//}
-	if (ImageButtonWithOutline("Crate", (ImTextureID)CrateTex, currentTool == SpawnTool::Box, ImVec2(48, 48)))
+	if (ImageButtonWithOutline("Crate", (ImTextureID)crateTex, currentTool == SpawnTool::Box, ImVec2(48, 48)))
 		currentTool = SpawnTool::Box;
 	ImGui::SameLine();
-	if (ImageButtonWithOutline("Ball", (ImTextureID)BallTex, currentTool == SpawnTool::Ball, ImVec2(48, 48)))
+	if (ImageButtonWithOutline("Ball", (ImTextureID)ballTex, currentTool == SpawnTool::Ball, ImVec2(48, 48)))
 		currentTool = SpawnTool::Ball;
-	//if (ImGui::ImageButton("Ball", (ImTextureID)BallTex, ImVec2(48, 48))) {
-	//	currentTool = SpawnTool::Ball;
-	//}
+
 	ImGui::SameLine();
-	if (ImageButtonWithOutline("Bowling", (ImTextureID)BowlingTex, currentTool == SpawnTool::BowlingBall, ImVec2(48, 48)))
+	if (ImageButtonWithOutline("Bowling", (ImTextureID)bowlingTex, currentTool == SpawnTool::BowlingBall, ImVec2(48, 48)))
 		currentTool = SpawnTool::BowlingBall;
-	//if (ImGui::ImageButton("Bowling", (ImTextureID)BowlingTex, ImVec2(48, 48))) {
-	//	currentTool = SpawnTool::BowlingBall;
-	//}
+
+	ImGui::SameLine();
+	if (ImageButtonWithOutline("Joint Tool", (ImTextureID)jointTex, currentTool == SpawnTool::JointConstraint, ImVec2(48, 48)))
+		currentTool = SpawnTool::JointConstraint;
+	
+	if (currentTool != SpawnTool::JointConstraint)
+		SetSelectedJointBodiesToDefault();
 
 
 
 	ImGui::Separator();
 	ImGui::Text("Current tool: %s", SpawnToolToString(currentTool));
+
+	if (mouseState == MouseState::Hold_Left)
+		ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
 
 	ImGui::End();
 }
@@ -276,29 +305,96 @@ bool Application::ImageButtonWithOutline(
 	return clicked;
 }
 
-void Application::CreateBodyBaseOnSpawnTool(SpawnTool tool, Vec2 pos)
+void Application::HandleSpawnTool(SpawnTool tool, Vec2 pos)
 {
 	Body* body;
 	switch (tool)
 	{
 		case SpawnTool::BowlingBall:
-			body = new Body(CircleShape(50.f), pos, 6.f, 0.1f);
+			body = new Body(CircleShape(50.f), pos, 6.f * uiStatic ? 0 : 1, 0.5f, 0.7f);
 			body->SetTexture("./assets/bowlingball.png");
 			world->AddBody(body);
 			break;
 
 		case SpawnTool::Ball:
-			body = new Body(CircleShape(50.f), pos, 1.f, 0.7f);
+			body = new Body(CircleShape(50.f), pos, 0.9f * uiStatic ? 0 : 1, 0.9f);
 			body->SetTexture("./assets/basketball.png");
 			world->AddBody(body);
 			break;
 
 		case SpawnTool::Box:
-			body = new Body(BoxShape(100.f, 100.f), pos, 10.f, 0.f, 1.0);
+			body = new Body(BoxShape(100.f, 100.f), pos, 10.f * uiStatic ? 0 : 1, 0.f, 1.0);
 			body->SetTexture("./assets/crate.png");
 			world->AddBody(body);
 			break;
 
 
+		case SpawnTool::JointConstraint:
+			if (Body* selectedBody = GetBodyAtPosition(pos))
+			{
+				if (!selectedJointBody1)
+				{
+					selectedJointBody1 = selectedBody;
+					selectedJointBody1->SetTextureColor(140, 140, 255);
+				}
+
+				else
+				{
+					selectedJointBody2 = selectedBody;
+					selectedJointBody2->SetTextureColor(140, 140, 255);
+
+					world->AddConstraint(new JointConstraint(selectedJointBody1, selectedJointBody2, selectedJointBody1->position));
+					SetSelectedJointBodiesToDefault();
+				}
+			}
+
+			else
+				SetSelectedJointBodiesToDefault();
 	}
+}
+
+void Application::SetSelectedJointBodiesToDefault()
+{
+	if (selectedJointBody1)
+	{
+		selectedJointBody1->ResetTextureColor();
+		selectedJointBody1 = nullptr;
+	}
+
+	if (selectedJointBody2)
+	{
+		selectedJointBody2->ResetTextureColor();
+		selectedJointBody2 = nullptr;
+	}
+}
+
+Body* Application::GetBodyAtPosition(const Vec2& mousePos)
+{
+	for (Body* body : world->GetBodies())
+	{
+		if (body->shape->GetType() == CIRCLE)
+		{
+			CircleShape* circle = (CircleShape*)body->shape;
+			Vec2 diff = mousePos - body->position;
+			if (diff.MagnitudeSquared() <= circle->radius * circle->radius)
+				return body;
+		}
+		else
+		{
+			// Simple AABB check for box
+			BoxShape* box = (BoxShape*)body->shape;
+
+			float halfW = box->width * 0.5f;
+			float halfH = box->height * 0.5f;
+
+			if (mousePos.x >= body->position.x - halfW &&
+				mousePos.x <= body->position.x + halfW &&
+				mousePos.y >= body->position.y - halfH &&
+				mousePos.y <= body->position.y + halfH)
+			{
+				return body;
+			}
+		}
+	}
+	return nullptr;
 }

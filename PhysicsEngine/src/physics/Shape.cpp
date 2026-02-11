@@ -168,7 +168,5 @@ Shape* BoxShape::Clone() const {
 }
 
 float BoxShape::GetMomentOfInertia() const {
-    // For a rectangle, the moment of inertia is 1/12 * (w^2 + h^2)
-    // But this still needs to be multiplied by the rigidbody's mass
     return (0.083333) * (width * width + height * height);
 }

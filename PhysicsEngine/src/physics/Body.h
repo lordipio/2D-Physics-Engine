@@ -27,6 +27,7 @@ struct Body
 	Shape* shape;
 
 	float mass;
+	float initialMass;
 	float InverseMass;
 	
 	float I;
@@ -36,9 +37,11 @@ struct Body
 	float friction;
 
 	SDL_Texture* texture = nullptr;
+	SDL_Texture* defaultTexture = nullptr;
 
-	void SetTexture(const char* texturePath);
-
+	void ResetTextureColor();
+	void SetTexture(const char* texturePath, Uint8 r = 255, Uint8 g = 255, Uint8 b = 255);
+	void SetTextureColor(Uint8 r = 255, Uint8 g = 255, Uint8 b = 255) const;
 	void IntegrateLinear(float dt);
 	void IntegrateAngular(float dt);
 
@@ -61,6 +64,9 @@ struct Body
 	Vec2 LocalToWorld(const Vec2& point) const;
 
 	Vec2 WorldToLocal(const Vec2& point) const;
+
+	void SetToMovable();
+	void SetToStatic();
 };
 
 #endif // !BODY_H

@@ -116,14 +116,20 @@ void World::Update(float dt) {
     for (auto& constraint: penetrations) {
         constraint.PreSolve(dt);
     }
+
     for (int i = 0; i < 10; i++) {
-        for (auto& constraint: constraints) {
+        for (auto& constraint : constraints) {
             constraint->Solve();
         }
+    }
+
+    for (int i = 0; i < 10; i++) {
         for (auto& constraint: penetrations) {
             constraint.Solve();
         }
     }
+
+
     for (auto& constraint: constraints) {
         constraint->PostSolve();
     }
@@ -136,6 +142,18 @@ void World::Update(float dt) {
     for (auto& body : bodies) {
         body->IntegrateVelocities(dt);
     }
+}
+
+void World::SetAllBodiesToStatic()
+{
+    for (Body* body : bodies)
+        body->SetToStatic();
+}
+
+void World::SetAllBodiesToMovable()
+{
+    for (Body* body : bodies)
+        body->SetToMovable();
 }
 
 void World::ClearBodies()

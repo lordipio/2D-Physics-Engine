@@ -142,7 +142,8 @@ void PenetrationConstraint::PreSolve(const float dt) {
     // Get the collision points in world space
     const Vec2 pa = a->LocalToWorld(aPoint);
     const Vec2 pb = b->LocalToWorld(bPoint);
-    Vec2 n = a->LocalToWorld(normal);
+    Vec2 n = (pb - pa);
+    n.Normalize();
 
     const Vec2 ra = pa - a->position;
     const Vec2 rb = pb - b->position;
@@ -166,7 +167,9 @@ void PenetrationConstraint::PreSolve(const float dt) {
     friction = std::max(a->friction, b->friction);
     if (friction > 0)
     {
-        Vec2 t = normal.Normal();
+        Vec2 t = n.Normal();
+        t.Normalize();
+
         jacobian.rows[1][0] = -t.x;
         jacobian.rows[1][1] = -t.y;
         jacobian.rows[1][2] = -ra.Cross(t);
@@ -199,7 +202,7 @@ void PenetrationConstraint::PreSolve(const float dt) {
     float vrelDotNormal = (va - vb).Dot(n);
 
     // Get the restitution between the two bodies
-    float e = std::min(a->restitution, b->restitution);
+    float e = std::max(a->restitution, b->restitution);
 
     // Calculate bias term considering elasticity (restitution)
     bias = (beta / dt) * C + (e * vrelDotNormal);

@@ -32,6 +32,9 @@ public:
 
 	void Update(float deltaTime);
 	// void CheckCollisions();
+
+	void SetAllBodiesToStatic();
+	void SetAllBodiesToMovable();
 };
 
 #endif // !WORLD_H

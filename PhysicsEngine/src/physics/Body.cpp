@@ -16,6 +16,7 @@ Body::Body(const Shape& shape, Vec2 Position, float Mass, float restitution, flo
 	this->sumForces = Vec2(0, 0);
 	this->sumTorques = 0.f;
 	this->mass = Mass;
+	this->initialMass = Mass;
 	if (Mass != 0)
 		InverseMass = 1.f / Mass;
 	else
@@ -62,15 +63,28 @@ void Body::IntegrateAngular(float dt)
 	//ClearAngularForce();
 }
 
-void Body::SetTexture(const char* texturePath)
+void Body::SetTexture(const char* texturePath, Uint8 r, Uint8 g, Uint8 b)
 {
 	if (SDL_Surface* surface = IMG_Load(texturePath))
 	{
-		texture = SDL_CreateTextureFromSurface(Graphics::renderer, surface);
+		defaultTexture = SDL_CreateTextureFromSurface(Graphics::renderer, surface);
+		texture = defaultTexture;
 		SDL_FreeSurface(surface);
+		SDL_SetTextureColorMod(texture, r, g, b);
 	}
 }
 
+void Body::SetTextureColor(Uint8 r, Uint8 g, Uint8 b) const
+{
+	if (texture)
+		SDL_SetTextureColorMod(texture, r, g, b);
+}
+
+void Body::ResetTextureColor()
+{
+	texture = defaultTexture;
+	SDL_SetTextureColorMod(texture, 255, 255, 255);
+}
 void Body::AddForce(const Vec2& Force)
 {
 	sumForces += Force;
@@ -159,4 +173,18 @@ void Body::IntegrateVelocities(float dt)
 	this->rotation += this->angularVelocity * dt;
 
 	shape->UpdateVertices(rotation, position);
+}
+
+void Body::SetToMovable()
+{
+	mass = initialMass;
+}
+
+void Body::SetToStatic()
+{
+	mass = 0.f;
+	ClearAngularForce();
+	ClearLinearForce();
+	velocity = Vec2(0.f, 0.f);
+	angularVelocity = 0.f;
 }
