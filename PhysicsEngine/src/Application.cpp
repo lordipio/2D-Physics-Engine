@@ -21,14 +21,17 @@ void Application::Setup()
 	BackgroundImageTex = Graphics::GetTexture("./assets/background.png");
 
 	Body* floor = new Body(BoxShape(Graphics::Width(), 100.f), Vec2(Graphics::Width()/2, Graphics::Height() - 82.f), 0, 0.1f, 1.f);
-	Body* wall1 = new Body(BoxShape(10.f, Graphics::Height() * 5), Vec2(-10.f, Graphics::Height() / 2), 0, 0.1f, 1.f);
-	Body* wall2 = new Body(BoxShape(10.f, Graphics::Height() * 5), Vec2(Graphics::Width() + 10.f, Graphics::Height() / 2), 0, 0.1f, 1.f);
+	Body* ceil = new Body(BoxShape(Graphics::Width(), 100.f), Vec2(Graphics::Width()/2, -50.f), 0, 0.1f, 1.f);
+	Body* wall1 = new Body(BoxShape(10.f, Graphics::Height() * 2), Vec2(-10.f, Graphics::Height() / 2), 0, 0.1f, 1.f);
+	Body* wall2 = new Body(BoxShape(10.f, Graphics::Height() * 2), Vec2(Graphics::Width() + 10.f, Graphics::Height() / 2), 0, 0.1f, 1.f);
 
 	floor->isInvisible = true;
+	ceil->isInvisible = true;
 	wall1->isInvisible = true;
 	wall2->isInvisible = true;
 
 	world->AddBody(floor);
+	world->AddBody(ceil);
 	world->AddBody(wall1);
 	world->AddBody(wall2);
 }
@@ -223,7 +226,7 @@ void Application::HandleUI()
 	ImGui::Begin("Simulation Controls");
 	ImGui::Text("Physics");
 	// slider controls gravity (in m/s^2)
-	if (ImGui::SliderFloat("Gravity (m/s^2)", &g, -50.0f, 50.0f))
+	if (ImGui::SliderFloat("Gravity (m/s^2)", &g, -20.0f, 20.0f))
 		world->gravity = g;
 	if (ImGui::Button(uiPaused ? "Resume" : "Pause")) {
 		uiPaused = !uiPaused;
