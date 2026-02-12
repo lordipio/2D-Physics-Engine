@@ -78,7 +78,7 @@ void JointConstraint::PreSolve(const float dt) {
     jacobian.rows[0][4] = J3.y; // B linear velocity.y
 
     float J4 = rb.Cross(pb - pa) * 2.0;
-    jacobian.rows[0][5] = J4;   // B angular velocity
+    jacobian.rows[0][5] = J4;   // B angular velocity1
 
     // Warm starting (apply cached lambda)
     const MatMN Jt = jacobian.Transpose();
@@ -164,7 +164,7 @@ void PenetrationConstraint::PreSolve(const float dt) {
     float J4 = rb.Cross(n);
     jacobian.rows[0][5] = J4;   // B angular velocity
 
-    friction = std::max(a->friction, b->friction);
+    friction = std::min(a->friction, b->friction);
     if (friction > 0)
     {
         Vec2 t = n.Normal();

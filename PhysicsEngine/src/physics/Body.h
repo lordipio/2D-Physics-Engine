@@ -12,6 +12,10 @@ struct Body
 	~Body();
 
 	bool isCollided = false;
+	bool isInvisible = false;
+	
+	void ChangeMass(float Mass);
+	void ResetMass();
 
 	Vec2 position;
 	Vec2 acceleration;

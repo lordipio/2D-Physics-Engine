@@ -44,6 +44,7 @@ public:
 	SDL_Texture* crateTex;
 	SDL_Texture* bowlingTex;
 	SDL_Texture* jointTex;
+	SDL_Texture* BackgroundImageTex;
 
 	enum class SpawnTool {
 		None,
@@ -64,6 +65,7 @@ public:
 		case SpawnTool::Box:         return "Box";
 		case SpawnTool::Ball:        return "Ball";
 		case SpawnTool::BowlingBall: return "Bowling Ball";
+		case SpawnTool::JointConstraint: return "Spring";
 		default:                     return "Unknown";
 		}
 	}
@@ -84,13 +86,19 @@ public:
 	Body* grabbedBody = nullptr;
 	Vec2 mouseVel;
 	Vec2 mousePreviousPos;
-	const float mouseVelSmoothing = 0.8f;
+	const float mouseVelSmoothing = 0.5f;
+
+	
 
 	// std::vector<Body*> selectedJointBodies;
 	Body* selectedJointBody1;
 	Body* selectedJointBody2;
 
 	bool uiStatic = false;
+	float uiObjectScale = 50.f;
+	float uiObjectMass = 1.f;
+	float uiObjectRestitution = 0.5f;
+	float uiObjectFriction = 0.5f;
 
 	void SetSelectedJointBodiesToDefault();
 

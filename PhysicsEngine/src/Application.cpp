@@ -18,9 +18,19 @@ void Application::Setup()
 	ballTex = Graphics::GetTexture("./assets/basketball.png");
 	bowlingTex = Graphics::GetTexture("./assets/bowlingball.png");
 	jointTex = Graphics::GetTexture("./assets/joint.png");
+	BackgroundImageTex = Graphics::GetTexture("./assets/background.png");
 
-	Body* floor = new Body(BoxShape(Graphics::Width() - 100, 100.f), Vec2(Graphics::Width()/2, Graphics::Height() - 100), 0, 0.1f, 1.f);
+	Body* floor = new Body(BoxShape(Graphics::Width(), 100.f), Vec2(Graphics::Width()/2, Graphics::Height() - 82.f), 0, 0.1f, 1.f);
+	Body* wall1 = new Body(BoxShape(10.f, Graphics::Height() * 5), Vec2(-10.f, Graphics::Height() / 2), 0, 0.1f, 1.f);
+	Body* wall2 = new Body(BoxShape(10.f, Graphics::Height() * 5), Vec2(Graphics::Width() + 10.f, Graphics::Height() / 2), 0, 0.1f, 1.f);
+
+	floor->isInvisible = true;
+	wall1->isInvisible = true;
+	wall2->isInvisible = true;
+
 	world->AddBody(floor);
+	world->AddBody(wall1);
+	world->AddBody(wall2);
 }
 
 void Application::Input()
@@ -139,7 +149,7 @@ void Application::Render()
 	Graphics::ImGuiNewFrame(Graphics::window); // if Graphics::window is public; otherwise pass stored window ptr
 
 	Uint32 color;
-
+	Graphics::DrawTexture(0, 0, 1920 * 2, 1080 * 2, 0, BackgroundImageTex);
 	for (Constraint* constraint : world->GetConstraints())
 	{
 		Vec2 aPos = constraint->a->position;
@@ -151,6 +161,9 @@ void Application::Render()
 
 	for (auto body : world->GetBodies())
 	{
+		if (body->isInvisible)
+			continue;
+		
 		if (isInDebugMode)
 			color = body->isCollided ? 0xFF0000FF : 0xFFFFFFFF;
 		else
@@ -210,7 +223,8 @@ void Application::HandleUI()
 	ImGui::Begin("Simulation Controls");
 	ImGui::Text("Physics");
 	// slider controls gravity (in m/s^2)
-	ImGui::SliderFloat("Gravity (m/s^2)", &g, -50.0f, 50.0f);
+	if (ImGui::SliderFloat("Gravity (m/s^2)", &g, -50.0f, 50.0f))
+		world->gravity = g;
 	if (ImGui::Button(uiPaused ? "Resume" : "Pause")) {
 		uiPaused = !uiPaused;
 	}
@@ -218,16 +232,13 @@ void Application::HandleUI()
 	if (ImGui::Button("Clear Bodies")) {
 		world->ClearBodies(); // implement a method to remove dynamic bodies if not present yet
 	}
+	ImGui::SameLine();
 
-	ImGui::Separator();
 	ImGui::Checkbox("Show debug mode", &isInDebugMode);
-	ImGui::Checkbox("Is Object Static?", &uiStatic);
 
+
+	
 	ImGui::End();
-
-	if (uiShowDemoWindow) {
-		ImGui::ShowDemoWindow(&uiShowDemoWindow);
-	}
 
 
 
@@ -256,14 +267,33 @@ void Application::HandleUI()
 	if (currentTool != SpawnTool::JointConstraint)
 		SetSelectedJointBodiesToDefault();
 
-
-
 	ImGui::Separator();
 	ImGui::Text("Current tool: %s", SpawnToolToString(currentTool));
 
 	if (mouseState == MouseState::Hold_Left)
 		ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
+	ImGui::Separator();
+	ImGui::Spacing();
+
+	if (ImGui::CollapsingHeader("Spawn Settings", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+		ImGui::PushItemWidth(200);
+
+		ImGui::Spacing();
+		ImGui::Text("Object Properties");
+		ImGui::Separator();
+
+		ImGui::SliderFloat("Scale", &uiObjectScale, 1.0f, 150.0f);
+		ImGui::SliderFloat("Mass", &uiObjectMass, 0.1f, 1000.0f);
+		ImGui::SliderFloat("Restitution", &uiObjectRestitution, 0.001f, 1.0f);
+		ImGui::SliderFloat("Friction", &uiObjectFriction, 0.0f, 1.0f);
+		ImGui::Checkbox("Is Object Static?", &uiStatic);
+
+		ImGui::PopItemWidth();
+		ImGui::PopStyleVar();
+	}
 
 	ImGui::End();
 }
@@ -311,19 +341,19 @@ void Application::HandleSpawnTool(SpawnTool tool, Vec2 pos)
 	switch (tool)
 	{
 		case SpawnTool::BowlingBall:
-			body = new Body(CircleShape(50.f), pos, 6.f * uiStatic ? 0 : 1, 0.5f, 0.7f);
+			body = new Body(CircleShape(uiObjectScale / 2.f), pos, uiStatic ? 0 : uiObjectMass, uiObjectRestitution, uiObjectFriction);
 			body->SetTexture("./assets/bowlingball.png");
 			world->AddBody(body);
 			break;
 
 		case SpawnTool::Ball:
-			body = new Body(CircleShape(50.f), pos, 0.9f * uiStatic ? 0 : 1, 0.9f);
+			body = new Body(CircleShape(uiObjectScale / 2.f), pos, uiStatic ? 0 : uiObjectMass, uiObjectRestitution, uiObjectFriction);
 			body->SetTexture("./assets/basketball.png");
 			world->AddBody(body);
 			break;
 
 		case SpawnTool::Box:
-			body = new Body(BoxShape(100.f, 100.f), pos, 10.f * uiStatic ? 0 : 1, 0.f, 1.0);
+			body = new Body(BoxShape(uiObjectScale, uiObjectScale), pos, uiStatic ? 0 : uiObjectMass, uiObjectRestitution, uiObjectFriction);
 			body->SetTexture("./assets/crate.png");
 			world->AddBody(body);
 			break;

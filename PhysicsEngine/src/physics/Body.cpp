@@ -37,6 +37,36 @@ Body::~Body()
 	SDL_DestroyTexture(texture);
 }
 
+void Body::ChangeMass(float Mass)
+{
+	this->mass = Mass;
+	if (Mass != 0)
+		InverseMass = 1.f / Mass;
+	else
+		InverseMass = 0.f;
+
+	I = shape->GetMomentOfInertia() * Mass;
+	if (I != 0)
+		this->inverseI = 1.0 / I;
+	else
+		this->inverseI = 0.0;
+}
+
+void Body::ResetMass()
+{
+	this->mass = initialMass;
+	if (mass != 0)
+		InverseMass = 1.f / mass;
+	else
+		InverseMass = 0.f;
+
+	I = shape->GetMomentOfInertia() * mass;
+	if (I != 0)
+		this->inverseI = 1.0 / I;
+	else
+		this->inverseI = 0.0;
+}
+
 void Body::IntegrateLinear(float dt)
 {
 	if (IsStatic())
@@ -107,7 +137,7 @@ void Body::ClearAngularForce()
 
 bool Body::IsStatic() const
 {
-	return InverseMass < 0.005f;
+	return InverseMass < 0.000001f;
 }
 
 
@@ -177,12 +207,13 @@ void Body::IntegrateVelocities(float dt)
 
 void Body::SetToMovable()
 {
-	mass = initialMass;
+	ResetMass();
 }
 
 void Body::SetToStatic()
 {
-	mass = 0.f;
+	ChangeMass(0);
+
 	ClearAngularForce();
 	ClearLinearForce();
 	velocity = Vec2(0.f, 0.f);
