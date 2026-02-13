@@ -1,6 +1,5 @@
 #include "Body.h"
-#include "D:\Projects\lordipio\2D-Physics-Engine\PhysicsEngine\src\Graphics.h"
-
+#include "Graphics.h"
 
 Body::Body(const Shape& shape, Vec2 Position, float Mass, float restitution, float friction)
 {
@@ -17,6 +16,7 @@ Body::Body(const Shape& shape, Vec2 Position, float Mass, float restitution, flo
 	this->sumTorques = 0.f;
 	this->mass = Mass;
 	this->initialMass = Mass;
+
 	if (Mass != 0)
 		InverseMass = 1.f / Mass;
 	else
@@ -65,32 +65,6 @@ void Body::ResetMass()
 		this->inverseI = 1.0 / I;
 	else
 		this->inverseI = 0.0;
-}
-
-void Body::IntegrateLinear(float dt)
-{
-	if (IsStatic())
-		return;
-
-	//this->Acceleration = sumForces *  this->InverseMass;
-	//this->Velocity += this->Acceleration * dt;
-
-	//this->Position += this->Velocity * dt;
-
-	//ClearLinearForce();
-}
-
-void Body::IntegrateAngular(float dt)
-{
-	if (IsStatic())
-		return;
-
-	//this->angularAcceleration = sumTorques * this->inverseI;
-	// this->angularVelocity += this->angularAcceleration * dt;
-
-	//this->rotation += this->angularVelocity * dt;
-
-	//ClearAngularForce();
 }
 
 void Body::SetTexture(const char* texturePath, Uint8 r, Uint8 g, Uint8 b)
@@ -160,6 +134,7 @@ void Body::ApplyImpulseLinear(const Vec2& J)
 {
 	if (IsStatic())
 		return;
+
 	velocity += J * InverseMass;
 }
 
@@ -167,6 +142,7 @@ void Body::ApplyImpulseAngular(const float J)
 {
 	if (IsStatic())
 		return;
+
 	angularVelocity += J * inverseI;
 }
 
@@ -176,7 +152,6 @@ void Body::ApplyImpulseAtPoint(const Vec2& J, const Vec2& r)
 		return;
 
 	velocity += J * InverseMass;
-
 	angularVelocity += r.Cross(J) * inverseI;
 }
 
@@ -187,11 +162,8 @@ void Body::IntegrateForces(float dt)
 
 	this->acceleration = sumForces * this->InverseMass;
 	this->velocity += this->acceleration * dt;
-
-
 	this->angularAcceleration = sumTorques * this->inverseI;
 	this->angularVelocity += this->angularAcceleration * dt;
-
 	ClearLinearForce();
 	ClearAngularForce();
 }
@@ -203,7 +175,6 @@ void Body::IntegrateVelocities(float dt)
 
 	this->position += this->velocity * dt;
 	this->rotation += this->angularVelocity * dt;
-
 	shape->UpdateVertices(rotation, position);
 }
 
@@ -215,7 +186,6 @@ void Body::SetToMovable()
 void Body::SetToStatic()
 {
 	ChangeMass(0);
-
 	ClearAngularForce();
 	ClearLinearForce();
 	velocity = Vec2(0.f, 0.f);

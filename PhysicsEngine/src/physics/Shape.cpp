@@ -16,7 +16,7 @@ Shape* CircleShape::Clone() const {
 }
 
 void CircleShape::UpdateVertices(float angle, const Vec2& position) {
-    return; // Circles don't have vertices... nothing to do here
+    return; 
 }
 
 ShapeType CircleShape::GetType() const {
@@ -24,13 +24,10 @@ ShapeType CircleShape::GetType() const {
 }
 
 float CircleShape::GetMomentOfInertia() const {
-    // For solid circles, the moment of inertia is 1/2 * r^2
-    // But this still needs to be multiplied by the rigidbody's mass
     return 0.5 * (radius * radius);
 }
 
 PolygonShape::PolygonShape(const std::vector<Vec2> vertices) {
-    // Initialize the vertices of the polygon shape
     for (auto vertex : vertices) {
         localVertices.push_back(vertex);
         worldVertices.push_back(vertex);
@@ -51,8 +48,6 @@ Shape* PolygonShape::Clone() const {
 }
 
 float PolygonShape::GetMomentOfInertia() const {
-    // TODO:
-    // We need to compute the moment of inertia of the polygon correctly!!!
     return 5000;
 }
 
@@ -64,11 +59,9 @@ Vec2 PolygonShape::EdgeAt(int index) const {
 
 float PolygonShape::FindMinSeparation(const PolygonShape* other, int& indexReferenceEdge, Vec2& supportPoint) const {
     float separation = std::numeric_limits<float>::lowest();
-    // Loop all the vertices of "this" polygon
     for (int i = 0; i < this->worldVertices.size(); i++) {
         Vec2 va = this->worldVertices[i];
         Vec2 normal = this->EdgeAt(i).Normal();
-        // Loop all the vertices of the "other" polygon
         float minSep = std::numeric_limits<float>::max();
         Vec2 minVertex;
         for (int j = 0; j < other->worldVertices.size(); j++) {
@@ -103,25 +96,18 @@ int PolygonShape::FindIncidentEdge(const Vec2& normal) const {
 }
 
 int PolygonShape::ClipSegmentToLine(const std::vector<Vec2>& contactsIn, std::vector<Vec2>& contactsOut, const Vec2& c0, const Vec2& c1) const {
-    // Start with no output points
     int numOut = 0;
-
-    // Calculate the distance of end points to the line
     Vec2 normal = (c1 - c0).Normalize();
     float dist0 = (contactsIn[0] - c0).Cross(normal);
     float dist1 = (contactsIn[1] - c0).Cross(normal);
-
-    // If the points are behind the plane
+    
     if (dist0 <= 0)
         contactsOut[numOut++] = contactsIn[0];
     if (dist1 <= 0)
         contactsOut[numOut++] = contactsIn[1];
 
-    // If the points are on different sides of the plane (one distance is negative and the other is positive)
     if (dist0 * dist1 < 0) {
         float totalDist = dist0 - dist1;
-
-        // Fint the intersection using linear interpolation: lerp(start,end) => start + t*(end-start)
         float t = dist0 / (totalDist);
         Vec2 contact = contactsIn[0] + (contactsIn[1] - contactsIn[0]) * t;
         contactsOut[numOut] = contact;
@@ -131,9 +117,7 @@ int PolygonShape::ClipSegmentToLine(const std::vector<Vec2>& contactsIn, std::ve
 }
 
 void PolygonShape::UpdateVertices(float angle, const Vec2& position) {
-    // Loop all the vertices, transforming from local to world space
     for (int i = 0; i < localVertices.size(); i++) {
-        // First rotate, then we translate
         worldVertices[i] = localVertices[i].Rotate(angle);
         worldVertices[i] += position;
     }
@@ -143,7 +127,6 @@ BoxShape::BoxShape(float width, float height) {
     this->width = width;
     this->height = height;
 
-    // Load the vertices of the box polygon
     localVertices.push_back(Vec2(-width / 2.0, -height / 2.0));
     localVertices.push_back(Vec2(+width / 2.0, -height / 2.0));
     localVertices.push_back(Vec2(+width / 2.0, +height / 2.0));
@@ -156,7 +139,6 @@ BoxShape::BoxShape(float width, float height) {
 }
 
 BoxShape::~BoxShape() {
-    // TODO: ...
 }
 
 ShapeType BoxShape::GetType() const {

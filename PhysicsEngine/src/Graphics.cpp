@@ -2,7 +2,6 @@
 #include <iostream>
 #include <SDL_image.h>
 
-
 SDL_Window* Graphics::window = NULL;
 SDL_Renderer* Graphics::renderer = NULL;
 int Graphics::windowWidth = 0;
@@ -42,8 +41,6 @@ bool Graphics::OpenWindow() {
 }
 
 void Graphics::ClearScreen(Uint32 color) {
-    // extract RGBA from 0xAARRGGBB style input
-    // note: your old code passed color >> bits but didn't mask alpha; simpler:
     Uint8 r = (color >> 16) & 0xFF;
     Uint8 g = (color >> 8) & 0xFF;
     Uint8 b = (color) & 0xFF;
@@ -52,12 +49,8 @@ void Graphics::ClearScreen(Uint32 color) {
 }
 
 void Graphics::RenderFrame() {
-
-    // Render ImGui draw data (if any)
     ImGui::Render();
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
-
-
     SDL_RenderPresent(renderer);
 }
 
@@ -72,8 +65,7 @@ void Graphics::DrawThickLine(int x0, int y0, int x1, int y1, Uint32 color, int t
     float length = sqrtf(dx * dx + dy * dy);
 
     if (length == 0) return;
-
-    // Unit perpendicular vector
+    
     float ux = -dy / length;
     float uy = dx / length;
 
@@ -138,7 +130,6 @@ void Graphics::DrawTexture(int x, int y, int width, int height, float rotation, 
 
 void Graphics::ImGuiInit(SDL_Window* window, SDL_Renderer* renderer)
 {
-    // ImGui initialization
     ImGui::CreateContext();
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
@@ -147,7 +138,6 @@ void Graphics::ImGuiInit(SDL_Window* window, SDL_Renderer* renderer)
 
 void Graphics::ImGuiShutdown()
 {
-    // Shutdown ImGui properly
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
@@ -158,11 +148,6 @@ void Graphics::ImGuiNewFrame(SDL_Window* window)
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
-}
-
-void Graphics::ImGuiRender()
-{
-
 }
 
 void Graphics::CloseWindow(void) {

@@ -32,7 +32,6 @@ struct Graphics {
     static void ImGuiInit(SDL_Window* window, SDL_Renderer* renderer);
     static void ImGuiShutdown();
     static void ImGuiNewFrame(SDL_Window* window);
-    static void ImGuiRender();
     static void DrawThickLine(int x0, int y0, int x1, int y1, Uint32 color, int thickness);
 
     static SDL_Texture* GetTexture(const char* path);

@@ -6,7 +6,6 @@
 bool Application::IsRunning()
 {
 	return isRunning;
-	SDL_Texture* t;
 }
 
 void Application::Setup()
@@ -148,7 +147,6 @@ void Application::Update()
 
 void Application::Render()
 {
-	// start ImGui frame
 	Graphics::ImGuiNewFrame(Graphics::window); // if Graphics::window is public; otherwise pass stored window ptr
 
 	Uint32 color;
@@ -223,10 +221,8 @@ void Application:: Destroy()
 
 void Application::HandleUI()
 {
-	// === ImGui UI ===
 	ImGui::Begin("Simulation Controls");
 	ImGui::Text("Physics");
-	// slider controls gravity (in m/s^2)
 	if (ImGui::SliderFloat("Gravity (m/s^2)", &g, -20.0f, 20.0f))
 		world->gravity = g;
 	if (ImGui::Button(uiPaused ? "Resume" : "Pause")) {
@@ -234,7 +230,7 @@ void Application::HandleUI()
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Clear Bodies")) {
-		world->ClearBodies(); // implement a method to remove dynamic bodies if not present yet
+		world->ClearBodies(); 
 	}
 	ImGui::SameLine();
 
@@ -309,7 +305,6 @@ bool Application::ImageButtonWithOutline(
 	bool selected,
 	ImVec2 size
 ) {
-	// Force hover style when selected
 	if (selected) {
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImGui::PushStyleColor(ImGuiCol_Button, style.Colors[ImGuiCol_ButtonHovered]);
@@ -319,7 +314,6 @@ bool Application::ImageButtonWithOutline(
 
 	bool clicked = ImGui::ImageButton(name, tex, size);
 
-	// Draw selection border AFTER the button exists
 	if (selected) {
 		ImDrawList* draw = ImGui::GetWindowDrawList();
 		draw->AddRect(
@@ -378,8 +372,6 @@ void Application::HandleSpawnTool(SpawnTool tool, Vec2 pos)
 					selectedJointBody2->SetTextureColor(140, 140, 255);
 
 					world->AddConstraint(new JointConstraint(selectedJointBody1, selectedJointBody2, (selectedJointBody1->position + selectedJointBody2->position)* 0.5f));
-					// world->AddConstraint(new JointConstraint(selectedJointBody1, selectedJointBody2, selectedJointBody1->position));
-					// world->AddConstraint(new JointConstraint(selectedJointBody2, selectedJointBody1, selectedJointBody2->position));
 					SetSelectedJointBodiesToDefault();
 				}
 			}
@@ -417,7 +409,6 @@ Body* Application::GetBodyAtPosition(const Vec2& mousePos)
 		}
 		else
 		{
-			// Simple AABB check for box
 			BoxShape* box = (BoxShape*)body->shape;
 
 			float halfW = box->width * 0.5f;

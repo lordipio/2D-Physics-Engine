@@ -29,10 +29,7 @@ public:
 	void AddBody(Body* body);
 	void AddForce(const Vec2& force);
 	void AddTorque(float torque);
-
 	void Update(float deltaTime);
-	// void CheckCollisions();
-
 	void SetAllBodiesToStatic();
 	void SetAllBodiesToMovable();
 };

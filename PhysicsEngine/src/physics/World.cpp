@@ -44,16 +44,12 @@ void World::AddTorque(float torque) {
 }
 
 void World::Update(float dt) {
-
-
         if (pendingClear)
         {
-            // Delete bodies
             for (Body* body : bodies)
                 delete body;
             bodies.clear();
 
-            // Delete constraints
             for (Constraint* constraint : constraints)
                 delete constraint;
             constraints.clear();
@@ -64,30 +60,23 @@ void World::Update(float dt) {
             pendingClear = false;
             return;
         }
-    // Create a vector of penetration constraints that will be solved frame per frame
     std::vector<PenetrationConstraint> penetrations;
 
-    // Loop all bodies of the world applying forces
     for (auto& body : bodies) {
-        // Apply the weight force to all bodies
         Vec2 weight = Vec2(0.0, body->mass * gravity * PIXELS_PER_METER);
         body->AddForce(weight);
 
-        // Apply forces to all bodies
         for (auto force : forces)
             body->AddForce(force);
 
-        // Apply torque to all bodies
         for (auto torque : torques)
             body->AddTorque(torque);
     }
 
-    // Integrate all the forces
     for (auto& body : bodies) {
         body->IntegrateForces(dt);
     }
 
-    // Check all the bodies with all other bodies detecting collisions
     for (int i = 0; i <= bodies.size() - 1; i++) {
         for (int j = i + 1; j < bodies.size(); j++) {
             Body* a = bodies[i];
@@ -96,11 +85,9 @@ void World::Update(float dt) {
             std::vector<Contact> contacts;
             if (CollisionDetection::IsColliding(a, b, contacts)) {
                 for (auto contact : contacts) {
-                    // Draw collision points
                     Graphics::DrawCircle(contact.start.x, contact.start.y, 5, 0.0, 0xFF00FFFF);
                     Graphics::DrawCircle(contact.end.x, contact.end.y, 2, 0.0, 0xFF00FFFF);
 
-                    // Create a new penetration constraint
                     PenetrationConstraint penetration(contact.a, contact.b, contact.start, contact.end, contact.normal);
                     penetrations.push_back(penetration);
                 }
@@ -108,8 +95,6 @@ void World::Update(float dt) {
         }
     }
 
-    // Solve all constraints
-    
     for (auto& constraint: constraints) {
         constraint->PreSolve(dt);
     }
@@ -129,7 +114,6 @@ void World::Update(float dt) {
         }
     }
 
-
     for (auto& constraint: constraints) {
         constraint->PostSolve();
     }
@@ -137,8 +121,6 @@ void World::Update(float dt) {
         constraint.PostSolve();
     }
     
-
-    // Integrate all the velocities
     for (auto& body : bodies) {
         body->IntegrateVelocities(dt);
     }
@@ -158,21 +140,17 @@ void World::SetAllBodiesToMovable()
 
 void World::ClearBodies()
 {
-    // Delete all bodies
     for (Body* body : bodies) {
         delete body;
     }
     bodies.clear();
 
-    // Delete all constraints (they reference bodies!)
     for (Constraint* constraint : constraints) {
         delete constraint;
     }
     constraints.clear();
 
-    // Clear global forces / torques
     forces.clear();
     torques.clear();
-
     pendingClear = true;
 }
