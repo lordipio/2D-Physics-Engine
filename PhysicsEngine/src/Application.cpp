@@ -153,12 +153,13 @@ void Application::Render()
 
 	Uint32 color;
 	Graphics::DrawTexture(0, 0, 1920 * 2, 1080 * 2, 0, BackgroundImageTex);
+
 	for (Constraint* constraint : world->GetConstraints())
 	{
 		Vec2 aPos = constraint->a->position;
 		Vec2 bPos = constraint->b->position;
 
-		Graphics::DrawLine(aPos.x, aPos.y, bPos.x, bPos.y, 0xFF000000);
+		Graphics::DrawThickLine(aPos.x, aPos.y, bPos.x, bPos.y, 0xFF11FFFF, 3);
 
 	}
 
@@ -376,7 +377,9 @@ void Application::HandleSpawnTool(SpawnTool tool, Vec2 pos)
 					selectedJointBody2 = selectedBody;
 					selectedJointBody2->SetTextureColor(140, 140, 255);
 
-					world->AddConstraint(new JointConstraint(selectedJointBody1, selectedJointBody2, selectedJointBody1->position));
+					world->AddConstraint(new JointConstraint(selectedJointBody1, selectedJointBody2, (selectedJointBody1->position + selectedJointBody2->position)* 0.5f));
+					// world->AddConstraint(new JointConstraint(selectedJointBody1, selectedJointBody2, selectedJointBody1->position));
+					// world->AddConstraint(new JointConstraint(selectedJointBody2, selectedJointBody1, selectedJointBody2->position));
 					SetSelectedJointBodiesToDefault();
 				}
 			}

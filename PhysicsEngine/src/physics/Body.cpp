@@ -118,11 +118,13 @@ void Body::ResetTextureColor()
 void Body::AddForce(const Vec2& Force)
 {
 	sumForces += Force;
+	sumForces *= 0.8;
 }
 
 void Body::AddTorque(const float& Torque)
 {
 	sumTorques += Torque;
+	sumTorques *= 0.8;
 }
 
 void Body::ClearLinearForce()

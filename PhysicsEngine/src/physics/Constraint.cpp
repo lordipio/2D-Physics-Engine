@@ -91,7 +91,7 @@ void JointConstraint::PreSolve(const float dt) {
     b->ApplyImpulseAngular(impulses[5]);                   // B angular impulse
 
     // Compute the bias term (baumgarte stabilization)
-    const float beta = 0.2f;
+    const float beta = 0.05f;
     float C = (pb - pa).Dot(pb - pa);
     C = std::max(0.0f, C - 0.01f);
     bias = (beta / dt) * C;

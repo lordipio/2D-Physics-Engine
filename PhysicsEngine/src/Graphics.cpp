@@ -65,6 +65,29 @@ void Graphics::DrawLine(int x0, int y0, int x1, int y1, Uint32 color) {
     lineColor(renderer, x0, y0, x1, y1, color);
 }
 
+void Graphics::DrawThickLine(int x0, int y0, int x1, int y1, Uint32 color, int thickness)
+{
+    float dx = float(x1 - x0);
+    float dy = float(y1 - y0);
+    float length = sqrtf(dx * dx + dy * dy);
+
+    if (length == 0) return;
+
+    // Unit perpendicular vector
+    float ux = -dy / length;
+    float uy = dx / length;
+
+    int half = thickness / 2;
+
+    for (int i = -half; i <= half; i++)
+    {
+        int ox = int(ux * i + 0.5f);
+        int oy = int(uy * i + 0.5f);
+        lineColor(renderer, x0 + ox, y0 + oy, x1 + ox, y1 + oy, color);
+    }
+}
+
+
 void Graphics::DrawCircle(int x, int y, int radius, float angle, Uint32 color) {
     circleColor(renderer, x, y, radius, color);
     lineColor(renderer, x, y, x + cos(angle) * radius, y + sin(angle) * radius, color);

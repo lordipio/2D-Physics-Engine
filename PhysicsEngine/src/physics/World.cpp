@@ -117,13 +117,13 @@ void World::Update(float dt) {
         constraint.PreSolve(dt);
     }
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 10; i++) {
         for (auto& constraint : constraints) {
             constraint->Solve();
         }
     }
 
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 5; i++) {
         for (auto& constraint: penetrations) {
             constraint.Solve();
         }
