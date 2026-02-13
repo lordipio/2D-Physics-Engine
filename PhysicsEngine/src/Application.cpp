@@ -72,7 +72,6 @@ void Application::Input()
 					int x, y;
 					SDL_GetMouseState(&x, &y);
 					mouseState = MouseState::Hold_Left;
-
 					grabbedBody = GetBodyAtPosition(Vec2(x, y));
 				}
 
@@ -81,7 +80,6 @@ void Application::Input()
 					int x, y;
 					SDL_GetMouseState(&x, &y);
 					HandleSpawnTool(currentTool, Vec2(x, y));
-
 				}
 
 
@@ -89,7 +87,6 @@ void Application::Input()
 				{
 					int x, y;
 					SDL_GetMouseState(&x, &y);
-
 				}
 			}
 
@@ -129,7 +126,6 @@ void Application::Update()
 		SDL_Delay(timeToWait);
 
 	float deltaTime = (SDL_GetTicks() - timePreviousFrame) / 1000.0f;
-
 	timePreviousFrame = SDL_GetTicks();
 
 	if (grabbedBody)
@@ -140,15 +136,12 @@ void Application::Update()
 		
 	if (!uiPaused)
 		world->Update(deltaTime);
-
-
 }
 
 
 void Application::Render()
 {
 	Graphics::ImGuiNewFrame(Graphics::window); // if Graphics::window is public; otherwise pass stored window ptr
-
 	Uint32 color;
 	Graphics::DrawTexture(0, 0, 1920 * 2, 1080 * 2, 0, BackgroundImageTex);
 
@@ -156,9 +149,7 @@ void Application::Render()
 	{
 		Vec2 aPos = constraint->a->position;
 		Vec2 bPos = constraint->b->position;
-
 		Graphics::DrawThickLine(aPos.x, aPos.y, bPos.x, bPos.y, 0xFF11FFFF, 3);
-
 	}
 
 	for (auto body : world->GetBodies())
@@ -178,7 +169,6 @@ void Application::Render()
 				Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
 			else
 				Graphics::DrawTexture(body->position.x, body->position.y, circleShape->radius * 2, circleShape->radius * 2, body->rotation, body->texture);
-
 		}
 
 		else if (body->shape->GetType() == BOX)
@@ -189,7 +179,6 @@ void Application::Render()
 
 			else
 				Graphics::DrawTexture(body->position.x, body->position.y,boxShape->width,boxShape->height, body->rotation, body->texture);
-
 		}
 
 		else if (body->shape->GetType() == POLYGON)
@@ -201,13 +190,10 @@ void Application::Render()
 			
 			else
 				Graphics::DrawFillPolygon(body->position.x, body->position.y, polygonShape->worldVertices, color);
-
 		}
 	}
 
-
 	HandleUI();
-
 	Graphics::RenderFrame();
 }
 
@@ -215,7 +201,6 @@ void Application::Render()
 void Application:: Destroy()
 {
 	delete world;
-
 	Graphics::CloseWindow();
 }
 
@@ -229,19 +214,8 @@ void Application::HandleUI()
 		uiPaused = !uiPaused;
 	}
 	ImGui::SameLine();
-	//if (ImGui::Button("Clear Bodies")) {
-	//	// world->ClearBodies(); 
-	//}
-	//ImGui::SameLine();
-
 	ImGui::Checkbox("Show debug mode", &isInDebugMode);
-
-
-	
 	ImGui::End();
-
-
-
 	ImGui::Begin("Spawn Tools", nullptr,
 		ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoCollapse |
@@ -290,7 +264,6 @@ void Application::HandleUI()
 		ImGui::SliderFloat("Restitution", &uiObjectRestitution, 0.001f, 1.0f);
 		ImGui::SliderFloat("Friction", &uiObjectFriction, 0.0f, 1.0f);
 		ImGui::Checkbox("Is Object Static?", &uiStatic);
-
 		ImGui::PopItemWidth();
 		ImGui::PopStyleVar();
 	}
@@ -356,7 +329,6 @@ void Application::HandleSpawnTool(SpawnTool tool, Vec2 pos)
 			world->AddBody(body);
 			break;
 
-
 		case SpawnTool::JointConstraint:
 			if (Body* selectedBody = GetBodyAtPosition(pos))
 			{
@@ -370,7 +342,6 @@ void Application::HandleSpawnTool(SpawnTool tool, Vec2 pos)
 				{
 					selectedJointBody2 = selectedBody;
 					selectedJointBody2->SetTextureColor(140, 140, 255);
-
 					world->AddConstraint(new JointConstraint(selectedJointBody1, selectedJointBody2, (selectedJointBody1->position + selectedJointBody2->position)* 0.5f));
 					SetSelectedJointBodiesToDefault();
 				}
