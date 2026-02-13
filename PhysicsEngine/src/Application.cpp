@@ -229,10 +229,10 @@ void Application::HandleUI()
 		uiPaused = !uiPaused;
 	}
 	ImGui::SameLine();
-	if (ImGui::Button("Clear Bodies")) {
-		world->ClearBodies(); 
-	}
-	ImGui::SameLine();
+	//if (ImGui::Button("Clear Bodies")) {
+	//	// world->ClearBodies(); 
+	//}
+	//ImGui::SameLine();
 
 	ImGui::Checkbox("Show debug mode", &isInDebugMode);
 
