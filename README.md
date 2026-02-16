@@ -24,14 +24,14 @@ This project implements rigid body dynamics, collision detection, impulse-based 
 ### Different Object Types
 Circles, boxes, and polygons interacting together with proper collision handling.
 
-![Different Objects](assets/gifs/different_objects.gif)
+![Different Objects](PhysicsEngine/assets/gifs/different_objects.gif)
 
 ---
 
 ### Gravity
 Objects accelerate under gravity and collide naturally with the environment.
 
-![Gravity](assets/gifs/gravity.gif)
+![Gravity](PhysicsEngine/assets/gifs/gravity.gif)
 
 ---
 
@@ -45,21 +45,21 @@ Demonstrates tangential impulse resolution and friction limits during contact.
 ### Restitution (Bounciness)
 Shows how restitution affects collision response and energy preservation.
 
-![Restitution](assets/gifs/restitution.gif)
+![Restitution](PhysicsEngine/assets/gifs/restitution.gif)
 
 ---
 
 ### Mass & Scale
 Objects with different masses respond differently to forces and impulses.
 
-![Mass and Scale](assets/gifs/mass_and_scale.gif)
+![Mass and Scale](PhysicsEngine/assets/gifs/mass_and_scale.gif)
 
 ---
 
 ### Joint Constraint
 A point-to-point (ball) joint that keeps two anchor points coincident in world space.
 
-![Joint Constraint](assets/gifs/joint_constraint.gif)
+![Joint Constraint](PhysicsEngine/assets/gifs/joint_constraint.gif)
 
 ---
 
