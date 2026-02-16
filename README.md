@@ -115,11 +115,9 @@ Contact manifolds are generated using **reference / incident edge clipping** for
 ---
 
 ## 📦 Dependencies
-
-- **C++17**
-- **SDL2**
-- **SDL2_image**
-- **Dear ImGui**
+![C++](https://img.shields.io/badge/C++-17-blue)
+![SDL2](https://img.shields.io/badge/SDL2-windowing-green)
+![ImGui](https://img.shields.io/badge/Dear%20ImGui-UI-blue)
 
 No external physics libraries are used.
 
