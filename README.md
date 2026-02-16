@@ -38,7 +38,7 @@ Objects accelerate under gravity and collide naturally with the environment.
 ### Friction
 Demonstrates tangential impulse resolution and friction limits during contact.
 
-![Friction](assets/gifs/friction.gif)
+![Friction](PhysicsEngine/assets/gifs/friction.gif)
 
 ---
 
